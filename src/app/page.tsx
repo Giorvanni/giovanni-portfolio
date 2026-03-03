@@ -461,6 +461,243 @@ function SectionDivider() {
   return <div className="section-divider mx-5 sm:mx-8" />;
 }
 
+// ─── Floating code editor window ───────────────────────────────────
+function CodeWindow() {
+  const lines: { code: ReactNode }[] = [
+    {
+      code: (
+        <>
+          <span className="text-purple-400">const</span>{" "}
+          <span className="text-white">giovanni</span>{" "}
+          <span className="text-zinc-600">=</span>{" "}
+          <span className="text-zinc-500">{"{"}</span>
+        </>
+      ),
+    },
+    {
+      code: (
+        <>
+          {"  "}
+          <span className="text-zinc-400">role</span>
+          <span className="text-zinc-600">:</span>{" "}
+          <span className="text-green-300">
+            &quot;Full Stack Engineer&quot;
+          </span>
+          <span className="text-zinc-600">,</span>
+        </>
+      ),
+    },
+    {
+      code: (
+        <>
+          {"  "}
+          <span className="text-zinc-400">company</span>
+          <span className="text-zinc-600">:</span>{" "}
+          <span className="text-green-300">&quot;BTV&quot;</span>
+          <span className="text-zinc-600">,</span>
+        </>
+      ),
+    },
+    {
+      code: (
+        <>
+          {"  "}
+          <span className="text-zinc-400">stack</span>
+          <span className="text-zinc-600">:</span>{" "}
+          <span className="text-zinc-600">[</span>
+          <span className="text-amber-300">&quot;Next.js&quot;</span>
+          <span className="text-zinc-600">,</span>{" "}
+          <span className="text-amber-300">&quot;TS&quot;</span>
+          <span className="text-zinc-600">,</span>{" "}
+          <span className="text-amber-300">&quot;Prisma&quot;</span>
+          <span className="text-zinc-600">],</span>
+        </>
+      ),
+    },
+    {
+      code: (
+        <>
+          {"  "}
+          <span className="text-zinc-400">focus</span>
+          <span className="text-zinc-600">:</span>{" "}
+          <span className="text-green-300">
+            &quot;production SaaS&quot;
+          </span>
+          <span className="text-zinc-600">,</span>
+        </>
+      ),
+    },
+    {
+      code: (
+        <>
+          {"  "}
+          <span className="text-zinc-400">status</span>
+          <span className="text-zinc-600">:</span>{" "}
+          <span className="text-green-300">
+            &quot;open_to_work&quot;
+          </span>
+          <span className="text-zinc-600">,</span>
+        </>
+      ),
+    },
+    {
+      code: <span className="text-zinc-500">{"};"}</span>,
+    },
+  ];
+
+  return (
+    <div className="code-window w-80">
+      <div className="code-window-bar">
+        <div className="code-window-dot" style={{ background: "#ff5f57" }} />
+        <div className="code-window-dot" style={{ background: "#febc2e" }} />
+        <div className="code-window-dot" style={{ background: "#28c840" }} />
+        <span className="ml-3 font-mono text-[11px] text-zinc-600">
+          giovanni.ts
+        </span>
+      </div>
+      <div className="p-4 font-mono text-[12px] leading-[1.9]">
+        {lines.map((l, i) => (
+          <div
+            key={i}
+            style={{
+              opacity: 0,
+              animation: `fade-up 0.4s ${2.2 + i * 0.12}s forwards`,
+            }}
+          >
+            <span className="mr-3 inline-block w-4 select-none text-right text-zinc-700">
+              {i + 1}
+            </span>
+            {l.code}
+          </div>
+        ))}
+        <div
+          style={{
+            opacity: 0,
+            animation: `fade-up 0.4s ${2.2 + lines.length * 0.12}s forwards`,
+          }}
+        >
+          <span className="mr-3 inline-block w-4 select-none text-right text-zinc-700">
+            {lines.length + 1}
+          </span>
+          <span className="typewriter-caret" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── 3D orbit rings visualization ──────────────────────────────────
+function OrbitRings() {
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center overflow-hidden"
+      style={{ perspective: "800px" }}
+    >
+      <div className="orbit-system relative">
+        {/* Ring 1 */}
+        <div
+          className="orbit-ring"
+          style={{
+            width: "350px",
+            height: "350px",
+            marginLeft: "-175px",
+            marginTop: "-175px",
+            borderWidth: "1px",
+            borderColor: "rgba(110,231,183,0.07)",
+            animation: "orbit 20s linear infinite",
+          }}
+        >
+          <div
+            className="orbit-dot"
+            style={{
+              width: "6px",
+              height: "6px",
+              background: "#6ee7b7",
+              opacity: 0.5,
+              boxShadow: "0 0 10px 2px rgba(110,231,183,0.4)",
+            }}
+          />
+        </div>
+        {/* Ring 2 */}
+        <div
+          className="orbit-ring"
+          style={{
+            width: "550px",
+            height: "550px",
+            marginLeft: "-275px",
+            marginTop: "-275px",
+            borderWidth: "1px",
+            borderColor: "rgba(167,139,250,0.04)",
+            animation: "orbit-reverse 32s linear infinite",
+          }}
+        >
+          <div
+            className="orbit-dot"
+            style={{
+              width: "8px",
+              height: "8px",
+              background: "#a78bfa",
+              opacity: 0.35,
+              boxShadow: "0 0 14px 3px rgba(167,139,250,0.25)",
+            }}
+          />
+        </div>
+        {/* Ring 3 */}
+        <div
+          className="orbit-ring"
+          style={{
+            width: "750px",
+            height: "750px",
+            marginLeft: "-375px",
+            marginTop: "-375px",
+            borderWidth: "1px",
+            borderColor: "rgba(56,189,248,0.025)",
+            animation: "orbit 45s linear infinite",
+          }}
+        >
+          <div
+            className="orbit-dot"
+            style={{
+              width: "5px",
+              height: "5px",
+              background: "#38bdf8",
+              opacity: 0.25,
+              boxShadow: "0 0 8px 2px rgba(56,189,248,0.2)",
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Terminal command strip ────────────────────────────────────────
+function TerminalStrip() {
+  const items = [
+    "building multi-tenant SaaS from scratch",
+    "designing production data architectures",
+    "shipping autonomous intelligence systems",
+    "engineering systems that compound",
+    "scaling platforms across business units",
+  ];
+  const doubled = [...items, ...items];
+
+  return (
+    <div className="terminal-strip">
+      <div className="marquee-track" style={{ animationDuration: "22s" }}>
+        {doubled.map((item, i) => (
+          <span
+            key={i}
+            className="mx-6 inline-flex shrink-0 items-center gap-2 whitespace-nowrap font-mono text-[11px] text-zinc-600"
+          >
+            <span className="text-accent">$</span> {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ================================================================
    SMALL COMPONENTS
    ================================================================ */
@@ -676,15 +913,26 @@ function SpotlightCard({
    ================================================================ */
 
 function Curtain() {
-  const [phase, setPhase] = useState<
-    "logo-in" | "logo-out" | "slide" | "done"
-  >("logo-in");
+  const [count, setCount] = useState(0);
+  const [phase, setPhase] = useState<"count" | "ready" | "split" | "done">(
+    "count"
+  );
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("logo-out"), 500);
-    const t2 = setTimeout(() => setPhase("slide"), 700);
-    const t3 = setTimeout(() => setPhase("done"), 1400);
+    const start = performance.now();
+    const dur = 900;
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / dur, 1);
+      setCount(Math.round((1 - Math.pow(1 - p, 3)) * 100));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    const t1 = setTimeout(() => setPhase("ready"), 950);
+    const t2 = setTimeout(() => setPhase("split"), 1500);
+    const t3 = setTimeout(() => setPhase("done"), 2300);
     return () => {
+      cancelAnimationFrame(raf);
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
@@ -693,37 +941,107 @@ function Curtain() {
 
   if (phase === "done") return null;
 
+  const splitting = phase === "split";
+
   return (
     <div
       style={{
         position: "fixed",
         inset: 0,
         zIndex: 10000,
-        background: "#080808",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        transform: phase === "slide" ? "translateY(-100%)" : "none",
-        transition:
-          phase === "slide"
-            ? "transform 0.7s cubic-bezier(0.76, 0, 0.24, 1)"
-            : "none",
+        pointerEvents: splitting ? "none" : "auto",
       }}
     >
-      <span
+      {/* Top panel */}
+      <div
         style={{
-          fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
-          fontWeight: 900,
-          letterSpacing: "-0.03em",
-          color: "white",
-          opacity: phase === "logo-out" || phase === "slide" ? 0 : 1,
-          transform: phase === "logo-in" ? "scale(0.9)" : "scale(1.05)",
-          transition:
-            "opacity 0.2s, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "50%",
+          background: "#080808",
+          transform: splitting ? "translateY(-105%)" : "none",
+          transition: splitting
+            ? "transform 0.8s cubic-bezier(0.76, 0, 0.24, 1)"
+            : "none",
+        }}
+      />
+      {/* Bottom panel */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "50%",
+          background: "#080808",
+          transform: splitting ? "translateY(105%)" : "none",
+          transition: splitting
+            ? "transform 0.8s cubic-bezier(0.76, 0, 0.24, 1)"
+            : "none",
+        }}
+      />
+      {/* Accent line at split */}
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: 0,
+          right: 0,
+          height: "1px",
+          background:
+            "linear-gradient(90deg, transparent, #6ee7b7, transparent)",
+          transform: "translateY(-0.5px)",
+          opacity: splitting ? 0 : phase === "ready" ? 1 : 0,
+          transition: "opacity 0.3s",
+        }}
+      />
+      {/* Counter + terminal */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          opacity: splitting ? 0 : 1,
+          transition: "opacity 0.3s",
         }}
       >
-        giovanni<span style={{ color: "#6ee7b7" }}>.</span>
-      </span>
+        <div
+          style={{
+            fontFamily: "var(--font-mono), monospace",
+            fontSize: "clamp(3rem, 10vw, 7rem)",
+            fontWeight: 900,
+            letterSpacing: "-0.05em",
+            color: "white",
+            lineHeight: 1,
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {String(count).padStart(3, "0")}
+        </div>
+        <div
+          style={{
+            fontFamily: "var(--font-mono), monospace",
+            fontSize: "12px",
+            color: "#6ee7b7",
+            marginTop: "20px",
+            height: "20px",
+            opacity: phase === "ready" || splitting ? 1 : 0,
+            transition: "opacity 0.3s",
+          }}
+        >
+          {(phase === "ready" || splitting) && (
+            <>
+              {">"} giovanni.init()
+              <span className="typewriter-caret" />
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -913,10 +1231,8 @@ function Hero() {
       {/* Interactive particle constellation */}
       <ParticleField />
 
-      {/* Morphing gradient blob */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div className="hero-blob" />
-      </div>
+      {/* 3D orbit rings */}
+      <OrbitRings />
 
       {/* Content */}
       <div className="relative z-10 mx-auto w-full max-w-3xl text-center">
@@ -1001,6 +1317,22 @@ function Hero() {
           >
             Get in Touch
           </a>
+        </div>
+      </div>
+
+      {/* Floating code window — desktop only */}
+      <div
+        className="absolute bottom-20 right-8 z-10 hidden lg:block xl:right-[calc(50vw-520px)]"
+        style={{ perspective: "800px" }}
+      >
+        <div
+          style={{
+            transform: "rotateY(-8deg) rotateX(4deg)",
+            opacity: 0,
+            animation: "fade-up 0.8s 1.9s forwards",
+          }}
+        >
+          <CodeWindow />
         </div>
       </div>
 
@@ -1672,6 +2004,7 @@ export default function Home() {
       <div ref={ringRef} className="cursor-ring" />
       <Nav />
       <Hero />
+      <TerminalStrip />
       <SectionDivider />
       <About />
       <SectionDivider />
