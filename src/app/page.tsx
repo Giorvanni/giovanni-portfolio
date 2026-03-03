@@ -141,6 +141,51 @@ function useCardSpotlight() {
   return { ref, onMove };
 }
 
+// ─── Scroll progress bar ───────────────────────────────────────────
+function useScrollProgress() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onScroll = () => {
+      const h = document.documentElement;
+      const progress = h.scrollTop / (h.scrollHeight - h.clientHeight);
+      el.style.transform = `scaleX(${Math.min(progress, 1)})`;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return ref;
+}
+
+// ─── 3D tilt effect ────────────────────────────────────────────────
+function useTilt(intensity = 6) {
+  const ref = useRef<HTMLDivElement>(null);
+  const frame = useRef(0);
+  const onMove = useCallback(
+    (e: React.MouseEvent) => {
+      const el = ref.current;
+      if (!el) return;
+      cancelAnimationFrame(frame.current);
+      frame.current = requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        el.style.transform = `perspective(800px) rotateY(${x * intensity}deg) rotateX(${-y * intensity}deg) scale3d(1.02,1.02,1.02)`;
+      });
+    },
+    [intensity]
+  );
+  const onLeave = useCallback(() => {
+    const el = ref.current;
+    if (el)
+      el.style.transform =
+        "perspective(800px) rotateY(0deg) rotateX(0deg) scale3d(1,1,1)";
+  }, []);
+  return { ref, onMove, onLeave };
+}
+
 /* ================================================================
    SMALL COMPONENTS
    ================================================================ */
@@ -149,18 +194,31 @@ function Section({
   children,
   className = "",
   id,
+  watermark,
 }: {
   children: ReactNode;
   className?: string;
   id?: string;
+  watermark?: string;
 }) {
   const { ref, visible } = useReveal(0.08);
   return (
     <section
       id={id}
       ref={ref}
-      className={`reveal-ready ${visible ? "reveal-visible" : ""} ${className}`}
+      className={`reveal-ready ${visible ? "reveal-visible" : ""} relative overflow-hidden ${className}`}
     >
+      {watermark && (
+        <span
+          className="section-watermark"
+          style={{
+            opacity: visible ? 1 : 0,
+            transition: "opacity 1.5s ease 0.3s",
+          }}
+        >
+          {watermark}
+        </span>
+      )}
       {children}
     </section>
   );
@@ -238,6 +296,45 @@ function SplitText({
   );
 }
 
+// ─── Typewriter effect ─────────────────────────────────────────────
+function Typewriter({
+  text,
+  startDelay = 1.2,
+}: {
+  text: string;
+  startDelay?: number;
+}) {
+  const [displayed, setDisplayed] = useState("");
+  const [done, setDone] = useState(false);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setStarted(true), startDelay * 1000);
+    return () => clearTimeout(t);
+  }, [startDelay]);
+
+  useEffect(() => {
+    if (!started) return;
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        setDone(true);
+        clearInterval(interval);
+      }
+    }, 55);
+    return () => clearInterval(interval);
+  }, [started, text]);
+
+  return (
+    <>
+      {displayed}
+      {started && !done && <span className="typewriter-caret" />}
+    </>
+  );
+}
+
 // ─── Skills marquee ────────────────────────────────────────────────
 function Marquee({ items }: { items: string[] }) {
   const doubled = [...items, ...items];
@@ -259,7 +356,7 @@ function Marquee({ items }: { items: string[] }) {
   );
 }
 
-// Spotlight card wrapper
+// Spotlight card wrapper with 3D tilt
 function SpotlightCard({
   children,
   className = "",
@@ -267,11 +364,91 @@ function SpotlightCard({
   children: ReactNode;
   className?: string;
 }) {
-  const { ref, onMove } = useCardSpotlight();
+  const { ref: spotRef, onMove: spotMove } = useCardSpotlight();
+  const { ref: tiltRef, onMove: tiltMove, onLeave: tiltLeave } = useTilt();
+
+  const ref = useCallback(
+    (el: HTMLDivElement | null) => {
+      (spotRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+      (tiltRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+    },
+    [spotRef, tiltRef]
+  );
+
+  const handleMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      spotMove(e);
+      tiltMove(e);
+    },
+    [spotMove, tiltMove]
+  );
+
   return (
-    <div ref={ref} onMouseMove={onMove} className={`card ${className}`}>
+    <div
+      ref={ref}
+      onMouseMove={handleMove}
+      onMouseLeave={tiltLeave}
+      className={`card tilt-card ${className}`}
+    >
       <div className="card-spotlight" />
       {children}
+    </div>
+  );
+}
+
+/* ================================================================
+   PAGE CURTAIN
+   ================================================================ */
+
+function Curtain() {
+  const [phase, setPhase] = useState<
+    "logo-in" | "logo-out" | "slide" | "done"
+  >("logo-in");
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase("logo-out"), 500);
+    const t2 = setTimeout(() => setPhase("slide"), 700);
+    const t3 = setTimeout(() => setPhase("done"), 1400);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, []);
+
+  if (phase === "done") return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 10000,
+        background: "#080808",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transform: phase === "slide" ? "translateY(-100%)" : "none",
+        transition:
+          phase === "slide"
+            ? "transform 0.7s cubic-bezier(0.76, 0, 0.24, 1)"
+            : "none",
+      }}
+    >
+      <span
+        style={{
+          fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
+          fontWeight: 900,
+          letterSpacing: "-0.03em",
+          color: "white",
+          opacity: phase === "logo-out" || phase === "slide" ? 0 : 1,
+          transform: phase === "logo-in" ? "scale(0.9)" : "scale(1.05)",
+          transition:
+            "opacity 0.2s, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+        }}
+      >
+        giovanni<span style={{ color: "#6ee7b7" }}>.</span>
+      </span>
     </div>
   );
 }
@@ -294,6 +471,7 @@ function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const active = useActiveSection(sectionIds);
+  const progressRef = useScrollProgress();
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
@@ -339,6 +517,7 @@ function Nav() {
           : "1px solid transparent",
       }}
     >
+      <div ref={progressRef} className="scroll-progress" />
       <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5 sm:px-8">
         <a href="#" className="text-lg font-bold tracking-tight text-white">
           giovanni<span className="text-accent">.</span>
@@ -494,7 +673,7 @@ function Hero() {
             transition: "opacity 0.6s 1.1s, transform 0.6s 1.1s",
           }}
         >
-          Systems-Oriented Full Stack Engineer
+          <Typewriter text="Systems-Oriented Full Stack Engineer" startDelay={1.6} />
         </p>
 
         {/* Description */}
@@ -535,7 +714,7 @@ function Hero() {
           </a>
           <a
             href="#contact"
-            className="w-full rounded-xl border border-white/10 px-8 py-3.5 text-[15px] font-medium text-zinc-300 transition-all hover:border-white/25 hover:text-white sm:w-auto"
+            className="outline-glow w-full rounded-xl border border-white/10 px-8 py-3.5 text-[15px] font-medium text-zinc-300 transition-all hover:border-transparent hover:text-white sm:w-auto"
           >
             Get in Touch
           </a>
@@ -571,6 +750,7 @@ function About() {
     <Section
       id="about"
       className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
+      watermark="About"
     >
       <div className="mb-4 flex items-center gap-3">
         <div className="h-px w-8 bg-accent/50" />
@@ -703,6 +883,7 @@ function Experience() {
     <Section
       id="experience"
       className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
+      watermark="Work"
     >
       <div className="mb-4 flex items-center gap-3">
         <div className="h-px w-8 bg-accent/50" />
@@ -825,6 +1006,7 @@ function Projects() {
     <Section
       id="projects"
       className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
+      watermark="Build"
     >
       <div className="mb-4 flex items-center gap-3">
         <div className="h-px w-8 bg-accent/50" />
@@ -1031,6 +1213,7 @@ function Skills() {
     <Section
       id="skills"
       className="py-24 sm:py-32 lg:py-40"
+      watermark="Stack"
     >
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
         <div className="mb-4 flex items-center gap-3">
@@ -1199,6 +1382,7 @@ export default function Home() {
 
   return (
     <div className="noise">
+      <Curtain />
       <div ref={spotlightRef} className="cursor-spotlight" />
       <Nav />
       <Hero />

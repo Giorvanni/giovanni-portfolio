@@ -193,3 +193,99 @@ body {
   color: #fff !important;
   background: rgba(255,255,255,0.04);
 }
+
+/* === Scroll progress bar === */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-accent), #a78bfa, var(--color-accent));
+  background-size: 200% 100%;
+  animation: gradient-x 3s linear infinite;
+  z-index: 9999;
+  transform-origin: left;
+  transform: scaleX(0);
+  will-change: transform;
+}
+
+@keyframes gradient-x {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* === Typewriter caret === */
+@keyframes blink-caret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.typewriter-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--color-accent);
+  margin-left: 2px;
+  animation: blink-caret 0.8s step-end infinite;
+  vertical-align: text-bottom;
+}
+
+/* === Section watermark === */
+.section-watermark {
+  position: absolute;
+  top: -0.1em;
+  right: -5%;
+  font-size: clamp(5rem, 14vw, 12rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,0.015);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  white-space: nowrap;
+}
+
+/* === Animated gradient outline button === */
+.outline-glow {
+  position: relative;
+  z-index: 0;
+}
+.outline-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--color-accent), #a78bfa, #38bdf8, var(--color-accent));
+  background-size: 300% 300%;
+  animation: gradient-x 4s linear infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+.outline-glow:hover::before {
+  opacity: 1;
+}
+
+/* === 3D tilt card === */
+.tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.15s ease-out;
+}
+
+/* === Horizontal line grow === */
+@keyframes line-width {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.reveal-visible .accent-line {
+  animation: line-width 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+  transform: scaleX(0);
+  transform-origin: left;
+}
