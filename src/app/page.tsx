@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type ReactNode,
+} from "react";
 
 // ─── Intersection Observer hook ────────────────────────────────────
 function useReveal(threshold = 0.15) {
@@ -42,7 +48,7 @@ function Section({
   );
 }
 
-// ─── Magnetic cursor effect on hero CTA ────────────────────────────
+// ─── Magnetic cursor effect ────────────────────────────────────────
 function useMagnetic() {
   const ref = useRef<HTMLAnchorElement>(null);
   const onMove = useCallback((e: React.MouseEvent) => {
@@ -88,6 +94,7 @@ function Nav() {
 
   const links = [
     { href: "#about", label: "About" },
+    { href: "#approach", label: "Approach" },
     { href: "#experience", label: "Experience" },
     { href: "#projects", label: "Projects" },
     { href: "#skills", label: "Skills" },
@@ -103,19 +110,16 @@ function Nav() {
           scrolled || open ? "blur(16px) saturate(180%)" : "none",
         WebkitBackdropFilter:
           scrolled || open ? "blur(16px) saturate(180%)" : "none",
-        borderBottom:
-          scrolled
-            ? "1px solid rgba(255,255,255,0.05)"
-            : "1px solid transparent",
+        borderBottom: scrolled
+          ? "1px solid rgba(255,255,255,0.05)"
+          : "1px solid transparent",
       }}
     >
       <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5 sm:px-8">
-        {/* Logo */}
         <a href="#" className="text-lg font-bold tracking-tight text-white">
           giovanni<span className="text-accent">.</span>
         </a>
 
-        {/* Desktop links */}
         <div className="hidden items-center gap-1 md:flex">
           {links.map((l) => (
             <a
@@ -134,7 +138,6 @@ function Nav() {
           </a>
         </div>
 
-        {/* Mobile toggle */}
         <button
           onClick={() => setOpen(!open)}
           className="relative z-50 flex h-8 w-8 flex-col items-center justify-center gap-1.5 md:hidden"
@@ -155,7 +158,6 @@ function Nav() {
         </button>
       </nav>
 
-      {/* Mobile menu */}
       <div
         className="overflow-hidden transition-all duration-300 md:hidden"
         style={{ maxHeight: open ? "100vh" : "0px" }}
@@ -194,7 +196,6 @@ function Hero() {
 
   return (
     <section className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-5 sm:px-8">
-      {/* Background glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2"
         style={{
@@ -214,7 +215,6 @@ function Hero() {
         }}
       />
 
-      {/* Content */}
       <div
         className="relative z-10 mx-auto w-full max-w-3xl text-center"
         style={{
@@ -224,7 +224,6 @@ function Hero() {
             "opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        {/* Status badge */}
         <div
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/[0.06] px-4 py-1.5"
           style={{
@@ -241,14 +240,12 @@ function Hero() {
           </span>
         </div>
 
-        {/* Name */}
         <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-black leading-[0.95] tracking-tighter text-white">
           Giovanni
           <br />
           <span className="shimmer-text">Bagmeijer</span>
         </h1>
 
-        {/* Role */}
         <p
           className="mt-6 text-sm font-medium uppercase tracking-[0.3em] text-zinc-500 sm:text-base"
           style={{
@@ -256,22 +253,21 @@ function Hero() {
             transition: "opacity 0.6s 0.4s",
           }}
         >
-          Full Stack Developer
+          Systems-Oriented Full Stack Engineer
         </p>
 
-        {/* Description */}
         <p
-          className="mx-auto mt-6 max-w-md text-base leading-relaxed text-zinc-500 sm:text-lg"
+          className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-zinc-500 sm:text-lg"
           style={{
             opacity: loaded ? 1 : 0,
             transition: "opacity 0.6s 0.55s",
           }}
         >
-          Building scalable platforms, data architectures, and AI&#8209;powered
-          systems. Turning strategic vision into production&#8209;ready code.
+          Designing scalable SaaS platforms, data architectures, and autonomous
+          systems. Turning strategic intent into production-ready software,
+          built to last.
         </p>
 
-        {/* CTA */}
         <div
           className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4"
           style={{
@@ -293,15 +289,14 @@ function Hero() {
             View My Work
           </a>
           <a
-            href="#about"
+            href="#contact"
             className="w-full rounded-xl border border-white/10 px-8 py-3.5 text-[15px] font-medium text-zinc-300 transition-all hover:border-white/25 hover:text-white sm:w-auto"
           >
-            Learn More
+            Get in Touch
           </a>
         </div>
       </div>
 
-      {/* Scroll hint */}
       <div
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
         style={{
@@ -328,7 +323,6 @@ function About() {
       id="about"
       className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
     >
-      {/* Label */}
       <div className="mb-4 flex items-center gap-3">
         <div className="h-px w-8 bg-accent/50" />
         <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
@@ -336,80 +330,78 @@ function About() {
         </span>
       </div>
 
-      {/* Heading */}
       <h2 className="max-w-2xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-        The developer behind the code
+        Engineering with leverage
       </h2>
 
-      {/* Two-column layout */}
-      <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_340px] lg:gap-16">
-        {/* Text */}
-        <div className="space-y-5 text-[15px] leading-[1.8] text-zinc-400">
-          <p>
-            I&apos;m a Full Stack Developer at{" "}
-            <span className="font-medium text-white">
-              Bright Technology Ventures
-            </span>
-            , serving as the technical sparring partner for management and
-            commercial teams. I design, build, and maintain digital platforms
-            and intelligence solutions across multiple business units.
-          </p>
-          <p>
-            Working autonomously, I translate strategic goals into scalable
-            technical solutions &mdash; focusing on maintainability, data
-            structure, and long-term value. My role bridges software
-            development, data engineering, and business strategy.
-          </p>
-          <p>
-            Before development, I spent 4 years as a{" "}
-            <span className="font-medium text-white">
-              Communication Specialist
-            </span>{" "}
-            at a real estate tech startup, scaling it from startup to scale-up.
-            This unique background helps me bridge the gap between technical
-            execution and business impact.
-          </p>
-        </div>
+      <div className="mt-12 space-y-5 max-w-2xl text-[15px] leading-[1.8] text-zinc-400">
+        <p>
+          I&apos;m a Full Stack Engineer at{" "}
+          <span className="font-medium text-white">
+            Bright Technology Ventures
+          </span>
+          , where I serve as a technical sparring partner for management and
+          commercial teams. I translate business strategy into scalable,
+          production-grade systems across multiple business units.
+        </p>
+        <p>
+          I specialize in designing software that reduces long-term development
+          friction. Generator-driven architectures, structured data models, and
+          systems that improve through iteration rather than decay.
+        </p>
+        <p>
+          Before moving into engineering, I spent four years as a{" "}
+          <span className="font-medium text-white">
+            Communication Specialist
+          </span>{" "}
+          at a real estate tech startup, helping scale it from early-stage to
+          scale-up. That background shapes how I build: I don&apos;t just ship
+          features. I build systems that create measurable business value.
+        </p>
+      </div>
+    </Section>
+  );
+}
 
-        {/* Sidebar cards */}
-        <div className="flex flex-col gap-4">
-          <div className="card p-5">
-            <h3 className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-accent">
-              Current Focus
-            </h3>
-            <ul className="space-y-2.5 text-[13px] text-zinc-400">
-              {[
-                "Custom React / Next.js platforms",
-                "First-party data architectures",
-                "Market intelligence systems",
-                "AI-powered automation",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-2.5">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/60" />
-                  {item}
-                </li>
-              ))}
-            </ul>
+// ─── Engineering Approach ──────────────────────────────────────────
+const approachItems = [
+  "Design once, reuse at scale (generator-driven development)",
+  "Prioritize data structure over surface features",
+  "Align architecture with long-term maintainability",
+  "Reduce marginal development cost through automation",
+  "Build with production constraints in mind from day one",
+  "Treat software as infrastructure, not experiments",
+];
+
+function Approach() {
+  return (
+    <Section
+      id="approach"
+      className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
+    >
+      <div className="mb-4 flex items-center gap-3">
+        <div className="h-px w-8 bg-accent/50" />
+        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+          Engineering Approach
+        </span>
+      </div>
+
+      <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+        How I build
+      </h2>
+
+      <div className="mt-12 grid gap-3 sm:grid-cols-2">
+        {approachItems.map((item) => (
+          <div
+            key={item}
+            className="card flex items-start gap-3.5 p-5"
+          >
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/60" />
+            <span className="text-[14px] leading-relaxed text-zinc-400">
+              {item}
+            </span>
           </div>
-          <div className="card p-5">
-            <h3 className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-accent">
-              Core Strengths
-            </h3>
-            <ul className="space-y-2.5 text-[13px] text-zinc-400">
-              {[
-                "Business needs \u2192 technical solutions",
-                "Zero-to-production builder",
-                "Autonomous problem solving",
-                "Data-driven decision making",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-2.5">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/60" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        ))}
       </div>
     </Section>
   );
@@ -418,34 +410,34 @@ function About() {
 // ─── Experience ────────────────────────────────────────────────────
 const jobs = [
   {
-    period: "Jun 2024 \u2014 Present",
+    period: "Jun 2024 \u2013 Present",
     role: "Full Stack Web Developer",
     company: "Bright Technology Ventures",
     current: true,
-    text: "Technical sparring partner for management & commercial teams. Designing, building, and maintaining digital platforms and internal intelligence solutions across multiple business units.",
+    text: "Technical sparring partner for management and commercial teams. Designing, building, and maintaining digital platforms and internal intelligence systems across multiple business units.",
     tags: [
-      "React & Next.js",
-      "Data Architecture",
+      "Multi-tenant SaaS",
+      "Data Modeling",
       "Market Intelligence",
-      "AI Automation",
-      "SEO Workflows",
+      "AI Integration",
+      "SEO Data Pipelines",
     ],
   },
   {
-    period: "Jan \u2014 Jun 2024",
+    period: "Jan \u2013 Jun 2024",
     role: "Technical Marketer",
     company: "Bright Technology Ventures",
     current: false,
-    text: "Combined marketing strategy with technical execution \u2014 website performance, data quality, Google Tag Manager, and HubSpot configuration for lead routing across multiple business units.",
+    text: "Bridged commercial growth and technical execution. Website performance, data quality, GTM, and HubSpot routing across business units.",
     tags: ["GTM", "HubSpot", "Performance", "Commercial Growth"],
   },
   {
-    period: "2019 \u2014 2023",
+    period: "2019 \u2013 2023",
     role: "Communication Specialist",
     company: "Kode Vastgoed",
     current: false,
-    text: "Helped scale the company from startup to scale-up. Built expertise in marketing, communications, and multi-channel content creation while driving stakeholder engagement.",
-    tags: ["Content", "Stakeholders", "Startup Scaling"],
+    text: "Helped scale the company from startup to scale-up. Led content strategy, stakeholder communication, and multi-channel growth initiatives.",
+    tags: ["Content Strategy", "Stakeholders", "Startup Scaling"],
   },
 ];
 
@@ -462,7 +454,7 @@ function Experience() {
         </span>
       </div>
       <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-        Where I&apos;ve grown
+        Where I&apos;ve worked
       </h2>
 
       <div className="mt-14 flex flex-col gap-6">
@@ -471,7 +463,6 @@ function Experience() {
             key={i}
             className="card group relative overflow-hidden p-6 sm:p-8"
           >
-            {/* Accent top edge for current */}
             {job.current && (
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
             )}
@@ -520,51 +511,40 @@ function Experience() {
 const projects = [
   {
     title: "Beyond Bricks",
-    sub: "SaaS Platform \u2014 Service Cost Management",
-    text: "Solo-built a complete SaaS platform for digitally managing and settling service costs in the rental sector. Architecture, backend, frontend, security, payments, hosting \u2014 all from scratch.",
-    stats: [
-      { val: "52", label: "API Routes" },
-      { val: "24", label: "DB Models" },
-      { val: "Solo", label: "Built" },
+    sub: "Service Cost Management SaaS Platform",
+    text: "Designed and built a complete SaaS platform for digitally managing and settling service costs in the rental sector. Architecture, backend, frontend, security, payments, hosting. All from scratch.",
+    architecture: [
+      "52 API routes",
+      "24 database models",
+      "RBAC system",
+      "Mollie payments + secure webhooks",
+      "Rate limiting & CSRF protection",
+      "PDF generation + email automation",
+      "Admin monitoring dashboard",
     ],
     tech: [
       "Next.js",
-      "React",
       "TypeScript",
       "Prisma",
       "PostgreSQL",
+      "Redis",
       "Tailwind",
       "Vercel",
-      "Redis",
       "Mollie",
-    ],
-    features: [
-      "Role-based access control",
-      "Mollie payments + webhooks",
-      "HMAC verification",
-      "Rate limiting & CSRF",
-      "PDF generation + emails",
-      "Admin monitoring dashboard",
     ],
     color: "#6ee7b7",
   },
   {
     title: "Sentinel",
-    sub: "Autonomous Market Intelligence \u2014 R&D",
-    text: 'Personal R&D project automating market & competitive analysis. Answers complex strategic questions like "What\'s happening in the market?" with scalable, serverless technology.',
-    stats: [
-      { val: "R&D", label: "Type" },
-      { val: "Serverless", label: "Arch" },
-      { val: "Async", label: "Processing" },
+    sub: "Autonomous Market Intelligence System (R&D)",
+    text: "A research-driven platform for automated competitive and market analysis. Designed to ingest signals, classify strategic movement, and surface actionable intelligence.",
+    architecture: [
+      "Async pipeline processing",
+      "Signal classification & scoring",
+      "LLM-powered semantic analysis",
+      "Serverless task orchestration",
     ],
-    tech: ["Python", "Docker", "AWS SQS", "LLMs", "Serverless"],
-    features: [
-      "Real-time signal collection",
-      "LLM semantic analysis",
-      "Automated reporting",
-      "Async pipeline",
-      "Scalable infrastructure",
-    ],
+    tech: ["Python", "Docker", "AWS SQS", "LLM APIs", "PostgreSQL"],
     color: "#a78bfa",
   },
 ];
@@ -588,7 +568,6 @@ function Projects() {
       <div className="mt-14 flex flex-col gap-8">
         {projects.map((p, i) => (
           <div key={i} className="card group relative overflow-hidden">
-            {/* Color accent line */}
             <div
               className="h-[2px]"
               style={{
@@ -596,50 +575,30 @@ function Projects() {
               }}
             />
 
-            {/* Hover glow */}
             <div
               className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full opacity-0 blur-[100px] transition-opacity duration-700 group-hover:opacity-100"
               style={{ background: p.color }}
             />
 
             <div className="relative z-10 p-6 sm:p-8 lg:p-10">
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold text-white sm:text-3xl">
-                    {p.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-zinc-500">{p.sub}</p>
-                </div>
+              <div>
+                <h3 className="text-2xl font-bold text-white sm:text-3xl">
+                  {p.title}
+                </h3>
+                <p className="mt-1 text-sm text-zinc-500">{p.sub}</p>
               </div>
 
               <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-zinc-500">
                 {p.text}
               </p>
 
-              {/* Stats row */}
-              <div className="mt-8 grid grid-cols-3 gap-3">
-                {p.stats.map((s) => (
-                  <div
-                    key={s.label}
-                    className="rounded-xl bg-white/[0.03] p-4 text-center ring-1 ring-white/[0.04]"
-                  >
-                    <div className="text-xl font-black text-white sm:text-2xl">
-                      {s.val}
-                    </div>
-                    <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.15em] text-zinc-600">
-                      {s.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Features */}
+              {/* Architecture */}
               <div className="mt-8">
                 <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                  Key Features
+                  Architecture
                 </h4>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {p.features.map((f) => (
+                  {p.architecture.map((f) => (
                     <div
                       key={f}
                       className="flex items-center gap-2 text-[13px] text-zinc-400"
@@ -664,18 +623,66 @@ function Projects() {
                 </div>
               </div>
 
-              {/* Tech */}
-              <div className="mt-8 flex flex-wrap gap-2">
-                {p.tech.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-md bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] text-zinc-500 ring-1 ring-white/[0.05] transition-colors hover:text-white"
-                  >
-                    {t}
-                  </span>
-                ))}
+              {/* Stack */}
+              <div className="mt-8">
+                <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                  Stack
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {p.tech.map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-md bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] text-zinc-500 ring-1 ring-white/[0.05] transition-colors hover:text-white"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+// ─── Architecture & Systems ────────────────────────────────────────
+const systemItems = [
+  "Multi-tenant SaaS architecture",
+  "Role-based access control modeling",
+  "Event-driven & async systems",
+  "Data-first relational modeling",
+  "Generator-based scaffolding",
+  "Secure webhook design (HMAC verification)",
+  "Production deployment pipelines",
+  "Observability & system health monitoring",
+];
+
+function Systems() {
+  return (
+    <Section
+      id="systems"
+      className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
+    >
+      <div className="mb-4 flex items-center gap-3">
+        <div className="h-px w-8 bg-accent/50" />
+        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+          Architecture & Systems
+        </span>
+      </div>
+
+      <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+        What I work with
+      </h2>
+
+      <div className="mt-12 grid gap-3 sm:grid-cols-2">
+        {systemItems.map((item) => (
+          <div key={item} className="card flex items-start gap-3.5 p-5">
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/60" />
+            <span className="text-[14px] leading-relaxed text-zinc-400">
+              {item}
+            </span>
           </div>
         ))}
       </div>
@@ -687,7 +694,7 @@ function Projects() {
 const skillGroups = [
   {
     title: "Frontend",
-    items: ["React", "Next.js", "TypeScript", "Tailwind CSS", "HTML / CSS"],
+    items: ["React", "Next.js", "TypeScript", "Tailwind", "HTML/CSS"],
   },
   {
     title: "Backend",
@@ -703,16 +710,7 @@ const skillGroups = [
       "LLM Integration",
       "SQL Architecture",
       "Market Intelligence",
-      "SEO Automation",
-    ],
-  },
-  {
-    title: "Marketing",
-    items: [
-      "Google Tag Manager",
-      "HubSpot",
-      "Content Strategy",
-      "Stakeholder Comms",
+      "Automation",
     ],
   },
 ];
@@ -733,7 +731,7 @@ function Skills() {
         My toolkit
       </h2>
 
-      <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {skillGroups.map((g) => (
           <div key={g.title} className="card flex h-full flex-col p-5 sm:p-6">
             <h3 className="mb-4 text-sm font-semibold text-white">
@@ -777,8 +775,7 @@ function Contact() {
         </h2>
 
         <p className="mt-4 text-sm leading-relaxed text-zinc-500 sm:text-base">
-          Interested in working together? I&apos;m always open to discussing new
-          opportunities and ideas.
+          Interested in collaborating or building something ambitious?
         </p>
 
         <div className="mt-10 grid gap-3 sm:grid-cols-2">
@@ -890,8 +887,10 @@ export default function Home() {
       <Nav />
       <Hero />
       <About />
+      <Approach />
       <Experience />
       <Projects />
+      <Systems />
       <Skills />
       <Contact />
       <Footer />
