@@ -289,3 +289,82 @@ body {
   transform: scaleX(0);
   transform-origin: left;
 }
+
+/* === Custom cursor (desktop only) === */
+@media (hover: hover) and (pointer: fine) {
+  .custom-cursor-active,
+  .custom-cursor-active * {
+    cursor: none !important;
+  }
+}
+
+.cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10002;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background 0.2s, mix-blend-mode 0s;
+  opacity: 0;
+  mix-blend-mode: difference;
+  will-change: left, top;
+}
+.cursor-dot.hover {
+  width: 40px;
+  height: 40px;
+  background: rgba(110,231,183,0.15);
+  mix-blend-mode: normal;
+}
+
+.cursor-ring {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10002;
+  transform: translate(-50%, -50%);
+  transition: width 0.25s cubic-bezier(0.165, 0.84, 0.44, 1),
+              height 0.25s cubic-bezier(0.165, 0.84, 0.44, 1),
+              border-color 0.3s,
+              opacity 0.3s;
+  opacity: 0;
+  will-change: left, top;
+}
+.cursor-ring.hover {
+  width: 60px;
+  height: 60px;
+  border-color: rgba(110,231,183,0.4);
+}
+
+/* === Morphing hero blob === */
+@keyframes morph {
+  0%, 100% { border-radius: 42% 56% 72% 28% / 42% 42% 56% 56%; transform: rotate(0deg); }
+  33%      { border-radius: 72% 28% 48% 48% / 28% 56% 42% 72%; }
+  66%      { border-radius: 48% 42% 28% 72% / 56% 28% 72% 42%; transform: rotate(120deg); }
+}
+
+.hero-blob {
+  width: min(700px, 80vw);
+  height: min(700px, 80vw);
+  background: radial-gradient(ellipse at 30% 50%, rgba(110,231,183,0.08), rgba(167,139,250,0.04), transparent 70%);
+  filter: blur(60px);
+  animation: morph 20s ease-in-out infinite;
+}
+
+/* === Section divider === */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 5%, rgba(110,231,183,0.12) 30%, rgba(167,139,250,0.08) 70%, transparent 95%);
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+/* === Text scramble mono hint === */
+.text-scramble {
+  font-variant-numeric: tabular-nums;
+}

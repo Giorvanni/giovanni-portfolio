@@ -186,6 +186,281 @@ function useTilt(intensity = 6) {
   return { ref, onMove, onLeave };
 }
 
+// ─── Custom cursor (dot + ring with spring) ───────────────────────
+function useCustomCursor() {
+  const dotRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if ("ontouchstart" in window || navigator.maxTouchPoints > 0) return;
+
+    const dot = dotRef.current;
+    const ring = ringRef.current;
+    if (!dot || !ring) return;
+
+    document.documentElement.classList.add("custom-cursor-active");
+
+    let mx = 0,
+      my = 0,
+      rx = 0,
+      ry = 0;
+    let raf = 0;
+
+    const move = (e: MouseEvent) => {
+      mx = e.clientX;
+      my = e.clientY;
+      dot.style.left = `${mx}px`;
+      dot.style.top = `${my}px`;
+      dot.style.opacity = "1";
+      ring.style.opacity = "1";
+    };
+
+    const leave = () => {
+      dot.style.opacity = "0";
+      ring.style.opacity = "0";
+    };
+
+    const over = (e: MouseEvent) => {
+      const t = (e.target as HTMLElement).closest(
+        "a, button, [role=button], input, textarea, select"
+      );
+      const h = !!t;
+      dot.classList.toggle("hover", h);
+      ring.classList.toggle("hover", h);
+    };
+
+    const tick = () => {
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      ring.style.left = `${rx}px`;
+      ring.style.top = `${ry}px`;
+      raf = requestAnimationFrame(tick);
+    };
+
+    window.addEventListener("mousemove", move, { passive: true });
+    window.addEventListener("mouseover", over, { passive: true });
+    document.addEventListener("mouseleave", leave);
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseover", over);
+      document.removeEventListener("mouseleave", leave);
+      cancelAnimationFrame(raf);
+      document.documentElement.classList.remove("custom-cursor-active");
+    };
+  }, []);
+
+  return { dotRef, ringRef };
+}
+
+/* ================================================================
+   INTERACTIVE COMPONENTS
+   ================================================================ */
+
+// ─── Canvas particle constellation ─────────────────────────────────
+function ParticleField() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+
+    let id = 0;
+    const mouse = { x: -9999, y: -9999 };
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const N = 60;
+    const CONN = 130;
+    const MR = 180;
+
+    type P = { x: number; y: number; vx: number; vy: number; r: number };
+    const pts: P[] = [];
+
+    const resize = () => {
+      const w = c.offsetWidth;
+      const h = c.offsetHeight;
+      c.width = w * dpr;
+      c.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+
+    const W = () => c.offsetWidth;
+    const H = () => c.offsetHeight;
+
+    for (let i = 0; i < N; i++) {
+      pts.push({
+        x: Math.random() * W(),
+        y: Math.random() * H(),
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 1.2 + 0.4,
+      });
+    }
+
+    const onMove = (e: MouseEvent) => {
+      const r = c.getBoundingClientRect();
+      mouse.x = e.clientX - r.left;
+      mouse.y = e.clientY - r.top;
+    };
+    const onLeave = () => {
+      mouse.x = -9999;
+      mouse.y = -9999;
+    };
+
+    c.addEventListener("mousemove", onMove);
+    c.addEventListener("mouseleave", onLeave);
+    window.addEventListener("resize", resize);
+
+    const draw = () => {
+      const w = W();
+      const h = H();
+      ctx.clearRect(0, 0, w, h);
+
+      for (const p of pts) {
+        const dx = p.x - mouse.x;
+        const dy = p.y - mouse.y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < MR && d > 0) {
+          const f = ((MR - d) / MR) * 0.015;
+          p.vx += (dx / d) * f;
+          p.vy += (dy / d) * f;
+        }
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.995;
+        p.vy *= 0.995;
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(110,231,183,0.25)";
+        ctx.fill();
+      }
+
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const dx = pts[i].x - pts[j].x;
+          const dy = pts[i].y - pts[j].y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < CONN) {
+            ctx.beginPath();
+            ctx.moveTo(pts[i].x, pts[i].y);
+            ctx.lineTo(pts[j].x, pts[j].y);
+            ctx.strokeStyle = `rgba(110,231,183,${(1 - d / CONN) * 0.12})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      for (const p of pts) {
+        const dx = p.x - mouse.x;
+        const dy = p.y - mouse.y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < MR) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.strokeStyle = `rgba(110,231,183,${(1 - d / MR) * 0.25})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+
+      id = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(id);
+      c.removeEventListener("mousemove", onMove);
+      c.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 z-[1]"
+      style={{ width: "100%", height: "100%" }}
+    />
+  );
+}
+
+// ─── Text scramble decode effect ───────────────────────────────────
+function TextScramble({
+  text,
+  className = "",
+}: {
+  text: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [display, setDisplay] = useState(text);
+  const triggered = useRef(false);
+  const alive = useRef(true);
+
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting && !triggered.current) {
+          triggered.current = true;
+          const chars = "!<>-_\\/[]{}=+*^?#";
+          let frame = 0;
+          const total = 25;
+          const step = () => {
+            if (!alive.current) return;
+            const progress = frame / total;
+            const resolved = Math.floor(progress * text.length);
+            let out = "";
+            for (let i = 0; i < text.length; i++) {
+              if (text[i] === " ") out += " ";
+              else if (i < resolved) out += text[i];
+              else out += chars[Math.floor(Math.random() * chars.length)];
+            }
+            setDisplay(out);
+            frame++;
+            if (frame <= total) requestAnimationFrame(step);
+            else setDisplay(text);
+          };
+          requestAnimationFrame(step);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [text]);
+
+  return (
+    <span ref={ref} className={`text-scramble ${className}`}>
+      {display}
+    </span>
+  );
+}
+
+// ─── Section divider ───────────────────────────────────────────────
+function SectionDivider() {
+  return <div className="section-divider mx-5 sm:mx-8" />;
+}
+
 /* ================================================================
    SMALL COMPONENTS
    ================================================================ */
@@ -635,6 +910,14 @@ function Hero() {
         />
       </div>
 
+      {/* Interactive particle constellation */}
+      <ParticleField />
+
+      {/* Morphing gradient blob */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="hero-blob" />
+      </div>
+
       {/* Content */}
       <div className="relative z-10 mx-auto w-full max-w-3xl text-center">
         {/* Status badge */}
@@ -760,7 +1043,7 @@ function About() {
       </div>
 
       <h2 className="max-w-2xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-        Engineering with leverage
+        <TextScramble text="Engineering with leverage" />
       </h2>
 
       <div className="mt-12 max-w-2xl space-y-5 text-[15px] leading-[1.8] text-zinc-400">
@@ -819,7 +1102,7 @@ function Approach() {
       </div>
 
       <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-        How I build
+        <TextScramble text="How I build" />
       </h2>
 
       <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -892,7 +1175,7 @@ function Experience() {
         </span>
       </div>
       <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-        Where I&apos;ve worked
+        <TextScramble text="Where I've worked" />
       </h2>
 
       <div className="mt-14 flex flex-col gap-6">
@@ -1015,7 +1298,7 @@ function Projects() {
         </span>
       </div>
       <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-        Built from scratch
+        <TextScramble text="Built from scratch" />
       </h2>
 
       <div className="mt-14 flex flex-col gap-8">
@@ -1159,7 +1442,7 @@ function Systems() {
       </div>
 
       <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-        What I work with
+        <TextScramble text="What I work with" />
       </h2>
 
       <div className="mt-12 grid gap-3 sm:grid-cols-2">
@@ -1223,7 +1506,7 @@ function Skills() {
           </span>
         </div>
         <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-          My toolkit
+          <TextScramble text="My toolkit" />
         </h2>
       </div>
 
@@ -1257,7 +1540,7 @@ function Contact() {
         </div>
 
         <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-          Let&apos;s talk
+          <TextScramble text="Let's talk" />
         </h2>
 
         <p className="mt-4 text-sm leading-relaxed text-zinc-500 sm:text-base">
@@ -1379,19 +1662,29 @@ function Footer() {
 
 export default function Home() {
   const spotlightRef = useCursorSpotlight();
+  const { dotRef, ringRef } = useCustomCursor();
 
   return (
     <div className="noise">
       <Curtain />
       <div ref={spotlightRef} className="cursor-spotlight" />
+      <div ref={dotRef} className="cursor-dot" />
+      <div ref={ringRef} className="cursor-ring" />
       <Nav />
       <Hero />
+      <SectionDivider />
       <About />
+      <SectionDivider />
       <Approach />
+      <SectionDivider />
       <Experience />
+      <SectionDivider />
       <Projects />
+      <SectionDivider />
       <Systems />
+      <SectionDivider />
       <Skills />
+      <SectionDivider />
       <Contact />
       <Footer />
     </div>
