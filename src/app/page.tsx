@@ -8,7 +8,11 @@ import {
   type ReactNode,
 } from "react";
 
-// ─── Intersection Observer hook ────────────────────────────────────
+/* ================================================================
+   HOOKS
+   ================================================================ */
+
+// ─── Intersection Observer ─────────────────────────────────────────
 function useReveal(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -26,6 +30,120 @@ function useReveal(threshold = 0.15) {
   }, [threshold]);
   return { ref, visible };
 }
+
+// ─── Active section tracker for nav ────────────────────────────────
+function useActiveSection(ids: string[]) {
+  const [active, setActive] = useState("");
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActive(id);
+        },
+        { rootMargin: "-40% 0px -55% 0px" }
+      );
+      io.observe(el);
+      observers.push(io);
+    });
+    return () => observers.forEach((io) => io.disconnect());
+  }, [ids]);
+  return active;
+}
+
+// ─── Cursor spotlight (global) ─────────────────────────────────────
+function useCursorSpotlight() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    const onMove = (e: MouseEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        el.style.left = `${e.clientX}px`;
+        el.style.top = `${e.clientY}px`;
+        el.style.opacity = "1";
+      });
+    };
+    const onLeave = () => {
+      el.style.opacity = "0";
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    document.addEventListener("mouseleave", onLeave);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseleave", onLeave);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+  return ref;
+}
+
+// ─── Magnetic cursor effect ────────────────────────────────────────
+function useMagnetic() {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const onMove = useCallback((e: React.MouseEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    el.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+  }, []);
+  const onLeave = useCallback(() => {
+    const el = ref.current;
+    if (el) el.style.transform = "translate(0,0)";
+  }, []);
+  return { ref, onMove, onLeave };
+}
+
+// ─── Mouse parallax for hero background ────────────────────────────
+function useParallax() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    const onMove = (e: MouseEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const cx = (e.clientX / window.innerWidth - 0.5) * 2;
+        const cy = (e.clientY / window.innerHeight - 0.5) * 2;
+        el.style.transform = `translate(${cx * 30}px, ${cy * 20}px)`;
+      });
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+  return ref;
+}
+
+// ─── Card spotlight (per-card mouse glow) ──────────────────────────
+function useCardSpotlight() {
+  const ref = useRef<HTMLDivElement>(null);
+  const onMove = useCallback((e: React.MouseEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const spotlight = el.querySelector(".card-spotlight") as HTMLElement;
+    if (spotlight) {
+      spotlight.style.background = `radial-gradient(400px circle at ${x}px ${y}px, rgba(110,231,183,0.06), transparent 60%)`;
+    }
+  }, []);
+  return { ref, onMove };
+}
+
+/* ================================================================
+   SMALL COMPONENTS
+   ================================================================ */
 
 function Section({
   children,
@@ -48,28 +166,134 @@ function Section({
   );
 }
 
-// ─── Magnetic cursor effect ────────────────────────────────────────
-function useMagnetic() {
-  const ref = useRef<HTMLAnchorElement>(null);
-  const onMove = useCallback((e: React.MouseEvent) => {
+// ─── Animated counter ──────────────────────────────────────────────
+function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [displayed, setDisplayed] = useState(0);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    el.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
-  }, []);
-  const onLeave = useCallback(() => {
-    const el = ref.current;
-    if (el) el.style.transform = "translate(0,0)";
-  }, []);
-  return { ref, onMove, onLeave };
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started) setStarted(true);
+      },
+      { threshold: 0.5 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [started]);
+
+  useEffect(() => {
+    if (!started) return;
+    const duration = 1200;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayed(Math.round(eased * value));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [started, value]);
+
+  return (
+    <span ref={ref}>
+      {displayed}
+      {suffix}
+    </span>
+  );
 }
 
-// ─── Nav ───────────────────────────────────────────────────────────
+// ─── Animated hero letters ─────────────────────────────────────────
+function SplitText({
+  text,
+  className = "",
+  baseDelay = 0,
+  loaded,
+}: {
+  text: string;
+  className?: string;
+  baseDelay?: number;
+  loaded: boolean;
+}) {
+  return (
+    <span className={className} aria-label={text}>
+      {text.split("").map((char, i) => (
+        <span
+          key={i}
+          className="hero-letter"
+          style={{
+            animationDelay: loaded ? `${baseDelay + i * 0.04}s` : "0s",
+            animationPlayState: loaded ? "running" : "paused",
+          }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+// ─── Skills marquee ────────────────────────────────────────────────
+function Marquee({ items }: { items: string[] }) {
+  const doubled = [...items, ...items];
+  return (
+    <div className="relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#080808] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#080808] to-transparent" />
+      <div className="marquee-track">
+        {doubled.map((item, i) => (
+          <span
+            key={i}
+            className="mx-3 shrink-0 rounded-lg bg-white/[0.03] px-5 py-2.5 text-[13px] text-zinc-500 ring-1 ring-white/[0.06] transition-colors hover:text-white"
+          >
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Spotlight card wrapper
+function SpotlightCard({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  const { ref, onMove } = useCardSpotlight();
+  return (
+    <div ref={ref} onMouseMove={onMove} className={`card ${className}`}>
+      <div className="card-spotlight" />
+      {children}
+    </div>
+  );
+}
+
+/* ================================================================
+   NAV
+   ================================================================ */
+
+const sectionIds = [
+  "about",
+  "approach",
+  "experience",
+  "projects",
+  "systems",
+  "skills",
+  "contact",
+];
+
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const active = useActiveSection(sectionIds);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
@@ -93,12 +317,12 @@ function Nav() {
   }, [open]);
 
   const links = [
-    { href: "#about", label: "About" },
-    { href: "#approach", label: "Approach" },
-    { href: "#experience", label: "Experience" },
-    { href: "#projects", label: "Projects" },
-    { href: "#skills", label: "Skills" },
-    { href: "#contact", label: "Contact" },
+    { href: "#about", label: "About", id: "about" },
+    { href: "#approach", label: "Approach", id: "approach" },
+    { href: "#experience", label: "Experience", id: "experience" },
+    { href: "#projects", label: "Projects", id: "projects" },
+    { href: "#skills", label: "Skills", id: "skills" },
+    { href: "#contact", label: "Contact", id: "contact" },
   ];
 
   return (
@@ -125,7 +349,7 @@ function Nav() {
             <a
               key={l.href}
               href={l.href}
-              className="rounded-lg px-3.5 py-1.5 text-[13px] text-zinc-500 transition-colors hover:text-white"
+              className={`rounded-lg px-3.5 py-1.5 text-[13px] text-zinc-500 transition-colors hover:text-white ${active === l.id ? "nav-link-active" : ""}`}
             >
               {l.label}
             </a>
@@ -168,7 +392,7 @@ function Nav() {
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="rounded-lg px-3 py-3 text-[15px] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
+              className={`rounded-lg px-3 py-3 text-[15px] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white ${active === l.id ? "nav-link-active" : ""}`}
             >
               {l.label}
             </a>
@@ -186,53 +410,65 @@ function Nav() {
   );
 }
 
-// ─── Hero ──────────────────────────────────────────────────────────
+/* ================================================================
+   HERO
+   ================================================================ */
+
 function Hero() {
   const mag = useMagnetic();
+  const parallax = useParallax();
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    setLoaded(true);
+    const t = setTimeout(() => setLoaded(true), 100);
+    return () => clearTimeout(t);
   }, []);
 
   return (
     <section className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-5 sm:px-8">
-      <div
-        className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2"
-        style={{
-          width: "min(900px, 90vw)",
-          height: "min(600px, 60vw)",
-          background:
-            "radial-gradient(ellipse, rgba(110,231,183,0.06) 0%, transparent 70%)",
-        }}
-      />
-      <div
-        className="pointer-events-none absolute bottom-0 right-0 translate-x-1/3 translate-y-1/4"
-        style={{
-          width: "500px",
-          height: "500px",
-          background:
-            "radial-gradient(circle, rgba(167,139,250,0.04) 0%, transparent 70%)",
-        }}
-      />
+      {/* Parallax background glows */}
+      <div ref={parallax} className="pointer-events-none absolute inset-0" style={{ transition: "transform 0.15s ease-out" }}>
+        <div
+          className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2"
+          style={{
+            width: "min(900px, 90vw)",
+            height: "min(600px, 60vw)",
+            background:
+              "radial-gradient(ellipse, rgba(110,231,183,0.07) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute bottom-0 right-0 translate-x-1/3 translate-y-1/4"
+          style={{
+            width: "500px",
+            height: "500px",
+            background:
+              "radial-gradient(circle, rgba(167,139,250,0.05) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute left-0 top-2/3 -translate-x-1/4"
+          style={{
+            width: "400px",
+            height: "400px",
+            background:
+              "radial-gradient(circle, rgba(56,189,248,0.03) 0%, transparent 70%)",
+          }}
+        />
+      </div>
 
-      <div
-        className="relative z-10 mx-auto w-full max-w-3xl text-center"
-        style={{
-          opacity: loaded ? 1 : 0,
-          transform: loaded ? "none" : "translateY(32px)",
-          transition:
-            "opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1)",
-        }}
-      >
+      {/* Content */}
+      <div className="relative z-10 mx-auto w-full max-w-3xl text-center">
+        {/* Status badge */}
         <div
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/[0.06] px-4 py-1.5"
           style={{
             opacity: loaded ? 1 : 0,
-            transition: "opacity 0.6s 0.2s",
+            transform: loaded ? "none" : "translateY(12px)",
+            transition: "opacity 0.6s 0.15s, transform 0.6s 0.15s",
           }}
         >
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+            <span className="absolute inline-flex h-full w-full rounded-full bg-accent" style={{ animation: "pulse-ring 2s ease-out infinite" }} />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
           </span>
           <span className="text-xs font-medium tracking-wider text-accent">
@@ -240,27 +476,34 @@ function Hero() {
           </span>
         </div>
 
-        <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-black leading-[0.95] tracking-tighter text-white">
-          Giovanni
+        {/* Name with split letter animation */}
+        <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-black leading-[0.95] tracking-tighter text-white" style={{ perspective: "600px" }}>
+          <SplitText text="Giovanni" loaded={loaded} baseDelay={0.3} />
           <br />
-          <span className="shimmer-text">Bagmeijer</span>
+          <span className="shimmer-text">
+            <SplitText text="Bagmeijer" loaded={loaded} baseDelay={0.6} />
+          </span>
         </h1>
 
+        {/* Role */}
         <p
           className="mt-6 text-sm font-medium uppercase tracking-[0.3em] text-zinc-500 sm:text-base"
           style={{
             opacity: loaded ? 1 : 0,
-            transition: "opacity 0.6s 0.4s",
+            transform: loaded ? "none" : "translateY(12px)",
+            transition: "opacity 0.6s 1.1s, transform 0.6s 1.1s",
           }}
         >
           Systems-Oriented Full Stack Engineer
         </p>
 
+        {/* Description */}
         <p
           className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-zinc-500 sm:text-lg"
           style={{
             opacity: loaded ? 1 : 0,
-            transition: "opacity 0.6s 0.55s",
+            transform: loaded ? "none" : "translateY(12px)",
+            transition: "opacity 0.6s 1.3s, transform 0.6s 1.3s",
           }}
         >
           Designing scalable SaaS platforms, data architectures, and autonomous
@@ -268,11 +511,13 @@ function Hero() {
           built to last.
         </p>
 
+        {/* CTA */}
         <div
           className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4"
           style={{
             opacity: loaded ? 1 : 0,
-            transition: "opacity 0.6s 0.7s",
+            transform: loaded ? "none" : "translateY(12px)",
+            transition: "opacity 0.6s 1.5s, transform 0.6s 1.5s",
           }}
         >
           <a
@@ -297,11 +542,12 @@ function Hero() {
         </div>
       </div>
 
+      {/* Scroll hint */}
       <div
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
         style={{
           opacity: loaded ? 1 : 0,
-          transition: "opacity 0.6s 1s",
+          transition: "opacity 0.6s 1.8s",
           animation: "float 3s ease-in-out infinite",
         }}
       >
@@ -316,7 +562,10 @@ function Hero() {
   );
 }
 
-// ─── About ─────────────────────────────────────────────────────────
+/* ================================================================
+   ABOUT
+   ================================================================ */
+
 function About() {
   return (
     <Section
@@ -334,7 +583,7 @@ function About() {
         Engineering with leverage
       </h2>
 
-      <div className="mt-12 space-y-5 max-w-2xl text-[15px] leading-[1.8] text-zinc-400">
+      <div className="mt-12 max-w-2xl space-y-5 text-[15px] leading-[1.8] text-zinc-400">
         <p>
           I&apos;m a Full Stack Engineer at{" "}
           <span className="font-medium text-white">
@@ -363,14 +612,17 @@ function About() {
   );
 }
 
-// ─── Engineering Approach ──────────────────────────────────────────
+/* ================================================================
+   ENGINEERING APPROACH
+   ================================================================ */
+
 const approachItems = [
-  "Design once, reuse at scale (generator-driven development)",
-  "Prioritize data structure over surface features",
-  "Align architecture with long-term maintainability",
-  "Reduce marginal development cost through automation",
-  "Build with production constraints in mind from day one",
-  "Treat software as infrastructure, not experiments",
+  { label: "Design once, reuse at scale", sub: "Generator-driven development" },
+  { label: "Data structure over surface features", sub: "Schema-first thinking" },
+  { label: "Architecture for long-term maintainability", sub: "Reduce future cost" },
+  { label: "Automate marginal development cost", sub: "Compounding efficiency" },
+  { label: "Production constraints from day one", sub: "Ship real software" },
+  { label: "Software as infrastructure", sub: "Not experiments" },
 ];
 
 function Approach() {
@@ -390,24 +642,29 @@ function Approach() {
         How I build
       </h2>
 
-      <div className="mt-12 grid gap-3 sm:grid-cols-2">
-        {approachItems.map((item) => (
-          <div
-            key={item}
-            className="card flex items-start gap-3.5 p-5"
-          >
-            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/60" />
-            <span className="text-[14px] leading-relaxed text-zinc-400">
-              {item}
-            </span>
-          </div>
+      <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {approachItems.map((item, i) => (
+          <SpotlightCard key={i} className="flex flex-col gap-2 p-5">
+            <div className="relative z-10">
+              <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-accent/[0.08] font-mono text-xs font-bold text-accent">
+                {String(i + 1).padStart(2, "0")}
+              </div>
+              <h3 className="text-[14px] font-semibold text-white">
+                {item.label}
+              </h3>
+              <p className="mt-1 text-[12px] text-zinc-600">{item.sub}</p>
+            </div>
+          </SpotlightCard>
         ))}
       </div>
     </Section>
   );
 }
 
-// ─── Experience ────────────────────────────────────────────────────
+/* ================================================================
+   EXPERIENCE
+   ================================================================ */
+
 const jobs = [
   {
     period: "Jun 2024 \u2013 Present",
@@ -459,68 +716,77 @@ function Experience() {
 
       <div className="mt-14 flex flex-col gap-6">
         {jobs.map((job, i) => (
-          <div
+          <SpotlightCard
             key={i}
-            className="card group relative overflow-hidden p-6 sm:p-8"
+            className="group relative overflow-hidden p-6 sm:p-8"
           >
             {job.current && (
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
             )}
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <h3 className="text-lg font-semibold text-white">
-                    {job.role}
-                  </h3>
-                  {job.current && (
-                    <span className="rounded-full bg-accent/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent ring-1 ring-accent/20">
-                      Current
-                    </span>
-                  )}
+            <div className="relative z-10">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <h3 className="text-lg font-semibold text-white">
+                      {job.role}
+                    </h3>
+                    {job.current && (
+                      <span className="rounded-full bg-accent/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent ring-1 ring-accent/20">
+                        Current
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-sm text-zinc-500">{job.company}</p>
                 </div>
-                <p className="mt-0.5 text-sm text-zinc-500">{job.company}</p>
-              </div>
-              <span className="shrink-0 text-xs tabular-nums text-zinc-600 sm:text-sm">
-                {job.period}
-              </span>
-            </div>
-
-            <p className="mt-4 text-[13px] leading-relaxed text-zinc-500 sm:text-sm">
-              {job.text}
-            </p>
-
-            <div className="mt-5 flex flex-wrap gap-1.5">
-              {job.tags.map((t) => (
-                <span
-                  key={t}
-                  className="rounded-md bg-white/[0.04] px-2.5 py-1 text-[11px] text-zinc-500 ring-1 ring-white/[0.06]"
-                >
-                  {t}
+                <span className="shrink-0 text-xs tabular-nums text-zinc-600 sm:text-sm">
+                  {job.period}
                 </span>
-              ))}
+              </div>
+
+              <p className="mt-4 text-[13px] leading-relaxed text-zinc-500 sm:text-sm">
+                {job.text}
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-1.5">
+                {job.tags.map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-md bg-white/[0.04] px-2.5 py-1 text-[11px] text-zinc-500 ring-1 ring-white/[0.06]"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          </SpotlightCard>
         ))}
       </div>
     </Section>
   );
 }
 
-// ─── Projects ──────────────────────────────────────────────────────
+/* ================================================================
+   PROJECTS
+   ================================================================ */
+
 const projects = [
   {
     title: "Beyond Bricks",
     sub: "Service Cost Management SaaS Platform",
     text: "Designed and built a complete SaaS platform for digitally managing and settling service costs in the rental sector. Architecture, backend, frontend, security, payments, hosting. All from scratch.",
+    stats: [
+      { value: 52, label: "API Routes" },
+      { value: 24, label: "DB Models" },
+      { value: 6, label: "Integrations" },
+    ],
     architecture: [
-      "52 API routes",
-      "24 database models",
       "RBAC system",
       "Mollie payments + secure webhooks",
       "Rate limiting & CSRF protection",
       "PDF generation + email automation",
       "Admin monitoring dashboard",
+      "Multi-tenant data isolation",
     ],
     tech: [
       "Next.js",
@@ -538,6 +804,11 @@ const projects = [
     title: "Sentinel",
     sub: "Autonomous Market Intelligence System (R&D)",
     text: "A research-driven platform for automated competitive and market analysis. Designed to ingest signals, classify strategic movement, and surface actionable intelligence.",
+    stats: [
+      { value: 4, label: "Pipelines" },
+      { value: 3, label: "LLM Models" },
+      { value: 1, label: "Prototype", suffix: "" },
+    ],
     architecture: [
       "Async pipeline processing",
       "Signal classification & scoring",
@@ -566,88 +837,121 @@ function Projects() {
       </h2>
 
       <div className="mt-14 flex flex-col gap-8">
-        {projects.map((p, i) => (
-          <div key={i} className="card group relative overflow-hidden">
+        {projects.map((p, i) => {
+          const cs = useCardSpotlight();
+          return (
             <div
-              className="h-[2px]"
-              style={{
-                background: `linear-gradient(90deg, ${p.color}, transparent 80%)`,
-              }}
-            />
+              key={i}
+              ref={cs.ref}
+              onMouseMove={cs.onMove}
+              className="card group relative overflow-hidden"
+            >
+              <div className="card-spotlight" />
+              <div
+                className="h-[2px]"
+                style={{
+                  background: `linear-gradient(90deg, ${p.color}, transparent 80%)`,
+                }}
+              />
 
-            <div
-              className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full opacity-0 blur-[100px] transition-opacity duration-700 group-hover:opacity-100"
-              style={{ background: p.color }}
-            />
+              <div
+                className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full opacity-0 blur-[100px] transition-opacity duration-700 group-hover:opacity-100"
+                style={{ background: p.color }}
+              />
 
-            <div className="relative z-10 p-6 sm:p-8 lg:p-10">
-              <div>
-                <h3 className="text-2xl font-bold text-white sm:text-3xl">
-                  {p.title}
-                </h3>
-                <p className="mt-1 text-sm text-zinc-500">{p.sub}</p>
-              </div>
+              <div className="relative z-10 p-6 sm:p-8 lg:p-10">
+                <div>
+                  <h3 className="text-2xl font-bold text-white sm:text-3xl">
+                    {p.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-zinc-500">{p.sub}</p>
+                </div>
 
-              <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-zinc-500">
-                {p.text}
-              </p>
+                <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-zinc-500">
+                  {p.text}
+                </p>
 
-              {/* Architecture */}
-              <div className="mt-8">
-                <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                  Architecture
-                </h4>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {p.architecture.map((f) => (
+                {/* Animated stats */}
+                <div className="mt-8 grid grid-cols-3 gap-3">
+                  {p.stats.map((s) => (
                     <div
-                      key={f}
-                      className="flex items-center gap-2 text-[13px] text-zinc-400"
+                      key={s.label}
+                      className="rounded-xl bg-white/[0.03] p-4 text-center ring-1 ring-white/[0.04]"
                     >
-                      <svg
-                        className="h-3.5 w-3.5 shrink-0"
-                        style={{ color: p.color }}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      {f}
+                      <div className="text-xl font-black text-white sm:text-2xl">
+                        {"suffix" in s && s.suffix === "" ? (
+                          s.value
+                        ) : (
+                          <CountUp value={s.value} suffix={("suffix" in s ? s.suffix : undefined) ?? "+"} />
+                        )}
+                      </div>
+                      <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.15em] text-zinc-600">
+                        {s.label}
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
 
-              {/* Stack */}
-              <div className="mt-8">
-                <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                  Stack
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {p.tech.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-md bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] text-zinc-500 ring-1 ring-white/[0.05] transition-colors hover:text-white"
-                    >
-                      {t}
-                    </span>
-                  ))}
+                {/* Architecture */}
+                <div className="mt-8">
+                  <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                    Architecture
+                  </h4>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {p.architecture.map((f) => (
+                      <div
+                        key={f}
+                        className="flex items-center gap-2 text-[13px] text-zinc-400"
+                      >
+                        <svg
+                          className="h-3.5 w-3.5 shrink-0"
+                          style={{ color: p.color }}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        {f}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Stack */}
+                <div className="mt-8">
+                  <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                    Stack
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {p.tech.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-md bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] text-zinc-500 ring-1 ring-white/[0.05] transition-colors hover:text-white"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </Section>
   );
 }
 
-// ─── Architecture & Systems ────────────────────────────────────────
+/* ================================================================
+   ARCHITECTURE & SYSTEMS
+   ================================================================ */
+
 const systemItems = [
   "Multi-tenant SaaS architecture",
   "Role-based access control modeling",
@@ -678,83 +982,82 @@ function Systems() {
 
       <div className="mt-12 grid gap-3 sm:grid-cols-2">
         {systemItems.map((item) => (
-          <div key={item} className="card flex items-start gap-3.5 p-5">
-            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/60" />
-            <span className="text-[14px] leading-relaxed text-zinc-400">
-              {item}
-            </span>
-          </div>
+          <SpotlightCard key={item} className="flex items-start gap-3.5 p-5">
+            <div className="relative z-10 flex items-start gap-3.5">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/60" />
+              <span className="text-[14px] leading-relaxed text-zinc-400">
+                {item}
+              </span>
+            </div>
+          </SpotlightCard>
         ))}
       </div>
     </Section>
   );
 }
 
-// ─── Skills ────────────────────────────────────────────────────────
-const skillGroups = [
-  {
-    title: "Frontend",
-    items: ["React", "Next.js", "TypeScript", "Tailwind", "HTML/CSS"],
-  },
-  {
-    title: "Backend",
-    items: ["Node.js", "Python", "PostgreSQL", "Prisma", "REST APIs", "Redis"],
-  },
-  {
-    title: "Cloud & DevOps",
-    items: ["Vercel", "AWS", "Docker", "Git"],
-  },
-  {
-    title: "Data & AI",
-    items: [
-      "LLM Integration",
-      "SQL Architecture",
-      "Market Intelligence",
-      "Automation",
-    ],
-  },
+/* ================================================================
+   SKILLS (Marquee)
+   ================================================================ */
+
+const allSkills = [
+  "React",
+  "Next.js",
+  "TypeScript",
+  "Tailwind",
+  "HTML/CSS",
+  "Node.js",
+  "Python",
+  "PostgreSQL",
+  "Prisma",
+  "REST APIs",
+  "Redis",
+  "Vercel",
+  "AWS",
+  "Docker",
+  "Git",
+  "LLM Integration",
+  "SQL Architecture",
+  "Market Intelligence",
+  "Automation",
 ];
 
 function Skills() {
+  const half = Math.ceil(allSkills.length / 2);
+  const row1 = allSkills.slice(0, half);
+  const row2 = allSkills.slice(half);
+
   return (
     <Section
       id="skills"
-      className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
+      className="py-24 sm:py-32 lg:py-40"
     >
-      <div className="mb-4 flex items-center gap-3">
-        <div className="h-px w-8 bg-accent/50" />
-        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-          Skills
-        </span>
+      <div className="mx-auto max-w-5xl px-5 sm:px-8">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="h-px w-8 bg-accent/50" />
+          <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+            Skills
+          </span>
+        </div>
+        <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+          My toolkit
+        </h2>
       </div>
-      <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-        My toolkit
-      </h2>
 
-      <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {skillGroups.map((g) => (
-          <div key={g.title} className="card flex h-full flex-col p-5 sm:p-6">
-            <h3 className="mb-4 text-sm font-semibold text-white">
-              {g.title}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {g.items.map((s) => (
-                <span
-                  key={s}
-                  className="rounded-md bg-white/[0.03] px-3 py-1.5 text-[12px] text-zinc-500 ring-1 ring-white/[0.05] transition-colors hover:text-white"
-                >
-                  {s}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="mt-14 flex flex-col gap-4">
+        <Marquee items={row1} />
+        <div style={{ direction: "rtl" }}>
+          <Marquee items={row2} />
+        </div>
       </div>
     </Section>
   );
 }
 
-// ─── Contact ───────────────────────────────────────────────────────
+/* ================================================================
+   CONTACT
+   ================================================================ */
+
 function Contact() {
   return (
     <Section
@@ -779,62 +1082,66 @@ function Contact() {
         </p>
 
         <div className="mt-10 grid gap-3 sm:grid-cols-2">
-          <a
-            href="mailto:g.bagmeijer@gmail.com"
-            className="card group flex items-center gap-4 p-5 text-left"
-          >
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/[0.08] text-accent transition-colors group-hover:bg-accent/20">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-            <div className="min-w-0">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-600">
-                Email
+          <SpotlightCard className="group flex items-center gap-4 p-5 text-left">
+            <a
+              href="mailto:g.bagmeijer@gmail.com"
+              className="relative z-10 flex w-full items-center gap-4"
+            >
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/[0.08] text-accent transition-colors group-hover:bg-accent/20">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
               </div>
-              <div className="mt-0.5 truncate text-sm text-zinc-400 transition-colors group-hover:text-accent">
-                g.bagmeijer@gmail.com
+              <div className="min-w-0">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-600">
+                  Email
+                </div>
+                <div className="mt-0.5 truncate text-sm text-zinc-400 transition-colors group-hover:text-accent">
+                  g.bagmeijer@gmail.com
+                </div>
               </div>
-            </div>
-          </a>
-          <a
-            href="tel:+31645073445"
-            className="card group flex items-center gap-4 p-5 text-left"
-          >
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/[0.08] text-accent transition-colors group-hover:bg-accent/20">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                />
-              </svg>
-            </div>
-            <div className="min-w-0">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-600">
-                Phone
+            </a>
+          </SpotlightCard>
+          <SpotlightCard className="group flex items-center gap-4 p-5 text-left">
+            <a
+              href="tel:+31645073445"
+              className="relative z-10 flex w-full items-center gap-4"
+            >
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/[0.08] text-accent transition-colors group-hover:bg-accent/20">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                  />
+                </svg>
               </div>
-              <div className="mt-0.5 text-sm text-zinc-400 transition-colors group-hover:text-accent">
-                06-45073445
+              <div className="min-w-0">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-600">
+                  Phone
+                </div>
+                <div className="mt-0.5 text-sm text-zinc-400 transition-colors group-hover:text-accent">
+                  06-45073445
+                </div>
               </div>
-            </div>
-          </a>
+            </a>
+          </SpotlightCard>
         </div>
 
         <div className="mt-6 flex items-center justify-center gap-2 text-xs text-zinc-600">
@@ -864,7 +1171,10 @@ function Contact() {
   );
 }
 
-// ─── Footer ────────────────────────────────────────────────────────
+/* ================================================================
+   FOOTER
+   ================================================================ */
+
 function Footer() {
   return (
     <footer className="border-t border-white/[0.04] px-5 py-8 sm:px-8">
@@ -880,10 +1190,16 @@ function Footer() {
   );
 }
 
-// ─── Page ──────────────────────────────────────────────────────────
+/* ================================================================
+   PAGE
+   ================================================================ */
+
 export default function Home() {
+  const spotlightRef = useCursorSpotlight();
+
   return (
     <div className="noise">
+      <div ref={spotlightRef} className="cursor-spotlight" />
       <Nav />
       <Hero />
       <About />
