@@ -866,10 +866,6 @@ function Aurora() {
 }
 
 // ─── Beam divider ──────────────────────────────────────────────────
-function BeamDivider() {
-  return <div className="beam-divider mx-5 sm:mx-8" />;
-}
-
 // ─── "Currently building" status widget ────────────────────────────
 function StatusWidget() {
   const [idx, setIdx] = useState(0);
@@ -2864,51 +2860,6 @@ function Learning() {
 }
 
 /* ================================================================
-   GITHUB ACTIVITY
-   ================================================================ */
-
-function GitHubActivity() {
-  return (
-    <Section id="github">
-      <div className="text-center">
-        <div className="mb-6 flex items-center justify-center gap-3">
-          <div className="h-px w-12 bg-accent/50" />
-          <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-            Open Source
-          </span>
-          <div className="h-px w-12 bg-accent/50" />
-        </div>
-        <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
-          GitHub Activity
-        </h2>
-        <p className="mx-auto mt-3 max-w-md text-sm text-zinc-500">
-          Contribution history from{" "}
-          <a
-            href="https://github.com/Giorvanni"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-accent hover:underline"
-          >
-            @Giorvanni
-          </a>
-        </p>
-        <div className="mt-8 flex justify-center">
-          <div className="overflow-hidden rounded-xl border border-white/[0.04] bg-white/[0.02] p-4 sm:p-6">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://ghchart.rshah.org/6ee7b7/Giorvanni"
-              alt="Giovanni&apos;s GitHub contribution chart"
-              className="h-auto w-full max-w-[720px]"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </div>
-    </Section>
-  );
-}
-
-/* ================================================================
    BLOG (COMING SOON)
    ================================================================ */
 
@@ -3128,29 +3079,16 @@ export default function Home() {
       <Hero />
       <TerminalStrip />
       <MetricsBanner />
-      <BeamDivider />
       <About />
-      <BeamDivider />
       <Principles />
-      <BeamDivider />
       <Experience />
-      <BeamDivider />
       <Projects />
-      <BeamDivider />
       <Systems />
-      <BeamDivider />
       <ArchitectureDeepDive />
-      <BeamDivider />
       <CurrentlyBuilding />
-      <BeamDivider />
       <Technologies />
-      <BeamDivider />
       <Learning />
-      <BeamDivider />
-      <GitHubActivity />
-      <BeamDivider />
       <BlogPreview />
-      <BeamDivider />
       <Contact />
       <Footer />
     </div>
