@@ -231,10 +231,12 @@ function useCustomCursor() {
     };
 
     const tick = () => {
-      rx += (mx - rx) * 0.12;
-      ry += (my - ry) * 0.12;
-      ring.style.left = `${rx}px`;
-      ring.style.top = `${ry}px`;
+      if (!document.hidden) {
+        rx += (mx - rx) * 0.12;
+        ry += (my - ry) * 0.12;
+        ring.style.left = `${rx}px`;
+        ring.style.top = `${ry}px`;
+      }
       raf = requestAnimationFrame(tick);
     };
 
@@ -253,6 +255,30 @@ function useCustomCursor() {
   }, []);
 
   return { dotRef, ringRef };
+}
+
+// ─── View counter (Upstash Redis) ──────────────────────────────────
+function useViewCount() {
+  const [views, setViews] = useState<number | null>(null);
+  const counted = useRef(false);
+
+  useEffect(() => {
+    if (counted.current) return;
+    counted.current = true;
+
+    fetch("/api/views", { method: "POST" })
+      .then((r) => r.json())
+      .then((d) => setViews(d.views))
+      .catch(() => {
+        // Fallback: just GET
+        fetch("/api/views")
+          .then((r) => r.json())
+          .then((d) => setViews(d.views))
+          .catch(() => {});
+      });
+  }, []);
+
+  return views;
 }
 
 /* ================================================================
@@ -316,6 +342,8 @@ function ParticleField() {
     window.addEventListener("resize", resize);
 
     const draw = () => {
+      id = requestAnimationFrame(draw);
+      if (document.hidden) return;
       const w = W();
       const h = H();
       ctx.clearRect(0, 0, w, h);
@@ -372,11 +400,9 @@ function ParticleField() {
           ctx.stroke();
         }
       }
-
-      id = requestAnimationFrame(draw);
     };
 
-    draw();
+    id = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(id);
@@ -682,7 +708,6 @@ function DotGrid() {
     if (!ctx) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let id = 0;
     const mouse = { x: -9999, y: -9999 };
     const GAP = 28;
     const BASE_R = 0.6;
@@ -697,16 +722,26 @@ function DotGrid() {
     };
     resize();
 
+    let pending = 0;
+    const requestDraw = () => {
+      if (!pending && !document.hidden) pending = requestAnimationFrame(draw);
+    };
+
     const onMove = (e: MouseEvent) => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
+      requestDraw();
     };
     const onLeave = () => {
       mouse.x = -9999;
       mouse.y = -9999;
+      requestDraw();
     };
+    const onScroll = () => requestDraw();
+    const onResize = () => { resize(); requestDraw(); };
 
     const draw = () => {
+      pending = 0;
       const w = window.innerWidth;
       const h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
@@ -739,21 +774,20 @@ function DotGrid() {
           ctx.fill();
         }
       }
-
-      id = requestAnimationFrame(draw);
     };
 
-    draw();
+    requestDraw();
     window.addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("mouseleave", onLeave);
-    window.addEventListener("resize", resize, { passive: true });
-    window.addEventListener("scroll", () => {}, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
-      cancelAnimationFrame(id);
+      if (pending) cancelAnimationFrame(pending);
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseleave", onLeave);
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onScroll);
     };
   }, []);
 
@@ -780,6 +814,8 @@ function Aurora() {
     resize();
 
     const draw = () => {
+      id = requestAnimationFrame(draw);
+      if (document.hidden) return;
       const w = c.width;
       const h = c.height;
       ctx.clearRect(0, 0, w, h);
@@ -816,11 +852,9 @@ function Aurora() {
         ctx.fillStyle = grad;
         ctx.fill();
       }
-
-      id = requestAnimationFrame(draw);
     };
 
-    draw();
+    id = requestAnimationFrame(draw);
     window.addEventListener("resize", resize, { passive: true });
     return () => {
       cancelAnimationFrame(id);
@@ -1533,10 +1567,9 @@ const sectionIds = [
   "contact",
 ];
 
-function Nav() {
+function Nav({ active }: { active: string }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const active = useActiveSection(sectionIds);
   const progressRef = useScrollProgress();
 
   useEffect(() => {
@@ -1796,6 +1829,16 @@ function Hero() {
           >
             Get in Touch
           </a>
+          <a
+            href="/CV_Giovanni_Bagmeijer_EN.pdf"
+            download
+            className="group flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-8 py-3.5 text-[15px] font-medium text-zinc-300 transition-all hover:border-accent/30 hover:text-accent sm:w-auto"
+          >
+            <svg className="h-4 w-4 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Download CV
+          </a>
         </div>
       </div>
 
@@ -1985,6 +2028,22 @@ const jobs = [
     current: false,
     text: "Helped scale the company from startup to scale-up. Led content strategy, stakeholder communication, and multi-channel growth initiatives.",
     tags: ["Content Strategy", "Stakeholders", "Startup Scaling"],
+  },
+  {
+    period: "2020 \u2013 2021",
+    role: "Intern \u2013 Entrepreneurial Exploration",
+    company: "Bluehub / Inventurinq (Venture Capital)",
+    current: false,
+    text: "Explored new venture opportunities within a VC environment. Researched market positioning, validated business models, and contributed to early-stage investment analysis across multiple portfolio companies.",
+    tags: ["Venture Capital", "Business Modeling", "Market Research", "Startups"],
+  },
+  {
+    period: "2019 \u2013 2020",
+    role: "Intern \u2013 Supply Chain Strategy",
+    company: "e-Fulfilment Hub",
+    current: false,
+    text: "Mapped stakeholder positioning within the supply chain and developed strategic recommendations. Gained hands-on experience in logistics operations and stakeholder management at an SME level.",
+    tags: ["Supply Chain", "Stakeholder Strategy", "Logistics", "SME"],
   },
 ];
 
@@ -2805,6 +2864,96 @@ function Learning() {
 }
 
 /* ================================================================
+   GITHUB ACTIVITY
+   ================================================================ */
+
+function GitHubActivity() {
+  return (
+    <Section id="github">
+      <div className="text-center">
+        <div className="mb-6 flex items-center justify-center gap-3">
+          <div className="h-px w-12 bg-accent/50" />
+          <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+            Open Source
+          </span>
+          <div className="h-px w-12 bg-accent/50" />
+        </div>
+        <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+          GitHub Activity
+        </h2>
+        <p className="mx-auto mt-3 max-w-md text-sm text-zinc-500">
+          Contribution history from{" "}
+          <a
+            href="https://github.com/Giorvanni"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent hover:underline"
+          >
+            @Giorvanni
+          </a>
+        </p>
+        <div className="mt-8 flex justify-center">
+          <div className="overflow-hidden rounded-xl border border-white/[0.04] bg-white/[0.02] p-4 sm:p-6">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://ghchart.rshah.org/6ee7b7/Giorvanni"
+              alt="Giovanni&apos;s GitHub contribution chart"
+              className="h-auto w-full max-w-[720px]"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/* ================================================================
+   BLOG (COMING SOON)
+   ================================================================ */
+
+function BlogPreview() {
+  return (
+    <Section id="blog">
+      <div className="text-center">
+        <div className="mb-6 flex items-center justify-center gap-3">
+          <div className="h-px w-12 bg-accent/50" />
+          <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+            Blog
+          </span>
+          <div className="h-px w-12 bg-accent/50" />
+        </div>
+        <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+          Coming Soon
+        </h2>
+        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-zinc-500">
+          I&apos;m working on technical articles about system design, SaaS architecture,
+          and lessons from building production software as a solo engineer.
+        </p>
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          {[
+            { title: "Shipping a SaaS Solo", desc: "Architecture decisions, trade-offs, and what I'd do differently." },
+            { title: "Data Pipelines at Scale", desc: "How I built ETL flows that handle millions of records daily." },
+            { title: "AI in Production", desc: "Practical patterns for integrating LLMs into real products." },
+          ].map((post) => (
+            <div
+              key={post.title}
+              className="group rounded-xl border border-white/[0.04] bg-white/[0.02] p-5 text-left transition-all hover:border-accent/10"
+            >
+              <div className="mb-2 inline-block rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">
+                Draft
+              </div>
+              <h3 className="text-sm font-bold text-zinc-300">{post.title}</h3>
+              <p className="mt-1 text-xs leading-relaxed text-zinc-600">{post.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/* ================================================================
    CONTACT
    ================================================================ */
 
@@ -2851,6 +3000,10 @@ function Contact() {
           </a>
         </div>
 
+        <p className="mt-4 text-xs text-zinc-600">
+          Typically responds within 24 hours
+        </p>
+
         {/* Contact details */}
         <div className="mt-12 grid gap-4 sm:grid-cols-3">
           <a href="mailto:g.bagmeijer@gmail.com" className="group flex flex-col items-center gap-2 rounded-xl border border-white/[0.04] bg-white/[0.02] p-5 transition-all hover:border-accent/20 hover:bg-accent/[0.04]">
@@ -2876,6 +3029,39 @@ function Contact() {
             <span className="text-sm text-zinc-400">Nijmegen, NL</span>
           </div>
         </div>
+
+        {/* Social links */}
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <a
+            href="https://github.com/Giorvanni"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-2 rounded-lg border border-white/[0.04] bg-white/[0.02] px-4 py-2.5 transition-all hover:border-accent/20 hover:bg-accent/[0.04]"
+          >
+            <svg className="h-4 w-4 text-zinc-500 transition-colors group-hover:text-accent" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+            </svg>
+            <span className="text-xs text-zinc-400 transition-colors group-hover:text-accent">GitHub</span>
+          </a>
+          <a
+            href="https://www.linkedin.com/in/giovanni-bagmeijer/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-2 rounded-lg border border-white/[0.04] bg-white/[0.02] px-4 py-2.5 transition-all hover:border-accent/20 hover:bg-accent/[0.04]"
+          >
+            <svg className="h-4 w-4 text-zinc-500 transition-colors group-hover:text-accent" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+            </svg>
+            <span className="text-xs text-zinc-400 transition-colors group-hover:text-accent">LinkedIn</span>
+          </a>
+        </div>
+
+        {/* References available */}
+        <div className="mt-8 rounded-xl border border-white/[0.04] bg-white/[0.015] px-6 py-4">
+          <p className="text-center text-sm text-zinc-500">
+            References available on request
+          </p>
+        </div>
       </div>
     </Section>
   );
@@ -2886,15 +3072,35 @@ function Contact() {
    ================================================================ */
 
 function Footer() {
+  const views = useViewCount();
+
   return (
     <footer className="border-t border-white/[0.04] px-5 py-8 sm:px-8">
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 sm:flex-row">
+      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 sm:flex-row">
         <span className="text-xs text-zinc-700">
           &copy; {new Date().getFullYear()} Giovanni Bagmeijer
         </span>
-        <span className="text-xs text-zinc-800">
-          Built with Next.js &middot; Tailwind &middot; Vercel
-        </span>
+        <div className="flex items-center gap-3">
+          <a href="https://github.com/Giorvanni" target="_blank" rel="noopener noreferrer" className="text-zinc-700 transition-colors hover:text-accent">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          </a>
+          <a href="https://www.linkedin.com/in/giovanni-bagmeijer/" target="_blank" rel="noopener noreferrer" className="text-zinc-700 transition-colors hover:text-accent">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+          <span className="mx-1 h-3 w-px bg-white/[0.06]"></span>
+          {views !== null && (
+            <span className="flex items-center gap-1.5 font-mono text-[11px] text-zinc-700">
+              <svg className="h-3 w-3 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              {views.toLocaleString()} views
+            </span>
+          )}
+          <span className="text-xs text-zinc-800">
+            Built with Next.js &middot; Tailwind &middot; Vercel
+          </span>
+        </div>
       </div>
     </footer>
   );
@@ -2910,14 +3116,14 @@ export default function Home() {
   const active = useActiveSection(sectionIds);
 
   return (
-    <div className="noise">
+    <div id="main" className="noise">
       <Curtain />
       <Aurora />
       <DotGrid />
       <div ref={spotlightRef} className="cursor-spotlight" />
       <div ref={dotRef} className="cursor-dot" />
       <div ref={ringRef} className="cursor-ring" />
-      <Nav />
+      <Nav active={active} />
       <SideNav active={active} />
       <Hero />
       <TerminalStrip />
@@ -2940,6 +3146,10 @@ export default function Home() {
       <Technologies />
       <BeamDivider />
       <Learning />
+      <BeamDivider />
+      <GitHubActivity />
+      <BeamDivider />
+      <BlogPreview />
       <BeamDivider />
       <Contact />
       <Footer />

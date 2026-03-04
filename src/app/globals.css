@@ -124,6 +124,8 @@ body {
   pointer-events: none;
   opacity: 0.025;
   background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 /* === Card surface === */
@@ -275,8 +277,10 @@ body {
 /* === 3D tilt card === */
 .tilt-card {
   transform-style: preserve-3d;
-  will-change: transform;
   transition: transform 0.15s ease-out;
+}
+.tilt-card:hover {
+  will-change: transform;
 }
 
 /* === Horizontal line grow === */
@@ -837,5 +841,28 @@ body {
   .arch-box {
     max-width: 100%;
     width: 100%;
+  }
+}
+
+/* === Content visibility optimization === */
+section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
+/* === Respect user motion preferences === */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .aurora-canvas,
+  .dot-grid-canvas,
+  .cursor-spotlight,
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
   }
 }
