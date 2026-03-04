@@ -671,6 +671,223 @@ function OrbitRings() {
   );
 }
 
+// ─── Dot grid background canvas ────────────────────────────────────
+function DotGrid() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let id = 0;
+    const mouse = { x: -9999, y: -9999 };
+    const GAP = 28;
+    const BASE_R = 0.6;
+    const GLOW_R = 200;
+
+    const resize = () => {
+      c.width = window.innerWidth * dpr;
+      c.height = window.innerHeight * dpr;
+      c.style.width = `${window.innerWidth}px`;
+      c.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+
+    const onMove = (e: MouseEvent) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    };
+    const onLeave = () => {
+      mouse.x = -9999;
+      mouse.y = -9999;
+    };
+
+    const draw = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      const scrollY = window.scrollY;
+      const cols = Math.ceil(w / GAP) + 1;
+      const rows = Math.ceil(h / GAP) + 1;
+      const offsetY = -(scrollY % GAP);
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = col * GAP;
+          const y = row * GAP + offsetY;
+          const dx = x - mouse.x;
+          const dy = y - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          let r = BASE_R;
+          let alpha = 0.08;
+
+          if (dist < GLOW_R) {
+            const t = 1 - dist / GLOW_R;
+            r = BASE_R + t * 1.8;
+            alpha = 0.08 + t * 0.35;
+          }
+
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(110, 231, 183, ${alpha})`;
+          ctx.fill();
+        }
+      }
+
+      id = requestAnimationFrame(draw);
+    };
+
+    draw();
+    window.addEventListener("mousemove", onMove, { passive: true });
+    document.addEventListener("mouseleave", onLeave);
+    window.addEventListener("resize", resize, { passive: true });
+    window.addEventListener("scroll", () => {}, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="dot-grid-canvas" />;
+}
+
+// ─── Glitch text wrapper ───────────────────────────────────────────
+function GlitchText({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <span className={`glitch-wrapper ${className}`}>
+      {children}
+      <span className="glitch-layer" aria-hidden="true">
+        {children}
+      </span>
+      <span className="glitch-layer" aria-hidden="true">
+        {children}
+      </span>
+    </span>
+  );
+}
+
+// ─── Floating tech icons in hero ───────────────────────────────────
+function FloatingIcons() {
+  const icons = [
+    { label: "TS", x: "8%", y: "18%", delay: "0s", dur: "7s", color: "#3178c6" },
+    { label: "{}",  x: "85%", y: "22%", delay: "1s", dur: "8s", color: "#6ee7b7" },
+    { label: "</>", x: "12%", y: "72%", delay: "2s", dur: "6s", color: "#a78bfa" },
+    { label: "()=>", x: "78%", y: "68%", delay: "0.5s", dur: "9s", color: "#fbbf24" },
+    { label: "git", x: "92%", y: "45%", delay: "1.5s", dur: "7.5s", color: "#f97316" },
+    { label: "sql", x: "5%", y: "48%", delay: "3s", dur: "8.5s", color: "#38bdf8" },
+    { label: "API", x: "70%", y: "12%", delay: "2.5s", dur: "6.5s", color: "#f472b6" },
+    { label: "fn", x: "25%", y: "82%", delay: "0.8s", dur: "7.2s", color: "#34d399" },
+  ];
+
+  return (
+    <>
+      {icons.map((ic, i) => (
+        <span
+          key={i}
+          className="floating-icon font-mono font-bold"
+          style={{
+            left: ic.x,
+            top: ic.y,
+            animationDelay: ic.delay,
+            animationDuration: ic.dur,
+            color: ic.color,
+            opacity: 0.08,
+          }}
+        >
+          {ic.label}
+        </span>
+      ))}
+    </>
+  );
+}
+
+// ─── Metrics banner ────────────────────────────────────────────────
+function MetricsBanner() {
+  const { ref, visible } = useReveal(0.2);
+  const metrics = [
+    { value: 52, suffix: "+", label: "API Routes Built" },
+    { value: 24, suffix: "+", label: "Database Models" },
+    { value: 6, suffix: "", label: "Integrations Shipped" },
+    { value: 3, suffix: "", label: "Products Delivered" },
+  ];
+
+  return (
+    <div
+      ref={ref}
+      className={`reveal-ready ${visible ? "reveal-visible" : ""} relative overflow-hidden border-y border-white/[0.03] bg-[#0a0a0a] py-16 sm:py-20`}
+    >
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-accent/[0.02] to-transparent" />
+      <div className="mx-auto grid max-w-5xl grid-cols-2 gap-8 px-5 sm:grid-cols-4 sm:px-8">
+        {metrics.map((m, i) => (
+          <div key={i} className="metric-item text-center">
+            <div
+              className="font-mono text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl"
+              style={{
+                opacity: visible ? 1 : 0,
+                transform: visible ? "none" : "translateY(100%)",
+                transition: `opacity 0.6s ${0.1 + i * 0.12}s, transform 0.6s cubic-bezier(0.22,1,0.36,1) ${0.1 + i * 0.12}s`,
+              }}
+            >
+              {visible ? <CountUp value={m.value} suffix={m.suffix} /> : "0"}
+            </div>
+            <div
+              className="mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600 sm:text-[11px]"
+              style={{
+                opacity: visible ? 1 : 0,
+                transition: `opacity 0.6s ${0.3 + i * 0.12}s`,
+              }}
+            >
+              {m.label}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Side nav dots ─────────────────────────────────────────────────
+function SideNav({ active }: { active: string }) {
+  const items = [
+    { id: "about", label: "about" },
+    { id: "approach", label: "approach" },
+    { id: "experience", label: "experience" },
+    { id: "projects", label: "projects" },
+    { id: "systems", label: "systems" },
+    { id: "skills", label: "skills" },
+    { id: "contact", label: "contact" },
+  ];
+
+  return (
+    <nav className="side-nav hidden lg:flex" aria-label="Section navigation">
+      {items.map((item) => (
+        <a
+          key={item.id}
+          href={`#${item.id}`}
+          data-label={item.label}
+          className={`side-dot ${active === item.id ? "active" : ""}`}
+          aria-label={item.label}
+        />
+      ))}
+    </nav>
+  );
+}
+
 // ─── Terminal command strip ────────────────────────────────────────
 function TerminalStrip() {
   const items = [
@@ -1231,6 +1448,9 @@ function Hero() {
       {/* Interactive particle constellation */}
       <ParticleField />
 
+      {/* Floating tech icons */}
+      <FloatingIcons />
+
       {/* 3D orbit rings */}
       <OrbitRings />
 
@@ -1256,11 +1476,13 @@ function Hero() {
 
         {/* Name with split letter animation */}
         <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-black leading-[0.95] tracking-tighter text-white" style={{ perspective: "600px" }}>
-          <SplitText text="Giovanni" loaded={loaded} baseDelay={0.3} />
+          <GlitchText>
+            <SplitText text="Giovanni" loaded={loaded} baseDelay={0.3} />
+          </GlitchText>
           <br />
-          <span className="shimmer-text">
+          <GlitchText className="shimmer-text">
             <SplitText text="Bagmeijer" loaded={loaded} baseDelay={0.6} />
-          </span>
+          </GlitchText>
         </h1>
 
         {/* Role */}
@@ -1617,131 +1839,170 @@ const projects = [
 ];
 
 function Projects() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    if (!section || !track) return;
+
+    const onScroll = () => {
+      const rect = section.getBoundingClientRect();
+      const sectionH = section.offsetHeight;
+      const viewH = window.innerHeight;
+      const scrollable = sectionH - viewH;
+      if (scrollable <= 0) return;
+      const progress = Math.max(0, Math.min(1, -rect.top / scrollable));
+      const maxTranslate = track.scrollWidth - window.innerWidth;
+      track.style.transform = `translateX(${-progress * maxTranslate}px)`;
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <Section
+    <section
       id="projects"
-      className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
-      watermark="Build"
+      ref={sectionRef}
+      className="horizontal-scroll-section relative"
+      style={{ height: `${100 + projects.length * 80}vh` }}
     >
-      <div className="mb-4 flex items-center gap-3">
-        <div className="h-px w-8 bg-accent/50" />
-        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-          Projects
-        </span>
-      </div>
-      <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-        <TextScramble text="Built from scratch" />
-      </h2>
+      <div className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden">
+        <div className="mx-auto max-w-5xl px-5 pb-6 sm:px-8">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="h-px w-8 bg-accent/50" />
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+              Projects
+            </span>
+          </div>
+          <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+            <TextScramble text="Built from scratch" />
+          </h2>
+        </div>
 
-      <div className="mt-14 flex flex-col gap-8">
-        {projects.map((p, i) => {
-          const cs = useCardSpotlight();
-          return (
-            <div
-              key={i}
-              ref={cs.ref}
-              onMouseMove={cs.onMove}
-              className="card group relative overflow-hidden"
-            >
-              <div className="card-spotlight" />
+        <div
+          ref={trackRef}
+          className="horizontal-scroll-inner will-change-transform"
+          style={{ paddingLeft: "max(2rem, calc(50vw - 30rem))" }}
+        >
+          {projects.map((p, i) => {
+            const cs = useCardSpotlight();
+            return (
               <div
-                className="h-[2px]"
-                style={{
-                  background: `linear-gradient(90deg, ${p.color}, transparent 80%)`,
-                }}
-              />
+                key={i}
+                ref={cs.ref}
+                onMouseMove={cs.onMove}
+                className="card group relative overflow-hidden"
+                style={{ width: "min(85vw, 640px)" }}
+              >
+                <div className="card-spotlight" />
+                <div
+                  className="h-[2px]"
+                  style={{
+                    background: `linear-gradient(90deg, ${p.color}, transparent 80%)`,
+                  }}
+                />
 
-              <div
-                className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full opacity-0 blur-[100px] transition-opacity duration-700 group-hover:opacity-100"
-                style={{ background: p.color }}
-              />
+                <div
+                  className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full opacity-0 blur-[100px] transition-opacity duration-700 group-hover:opacity-100"
+                  style={{ background: p.color }}
+                />
 
-              <div className="relative z-10 p-6 sm:p-8 lg:p-10">
-                <div>
-                  <h3 className="text-2xl font-bold text-white sm:text-3xl">
-                    {p.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-zinc-500">{p.sub}</p>
-                </div>
+                <div className="relative z-10 p-6 sm:p-8">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white sm:text-3xl">
+                      {p.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-zinc-500">{p.sub}</p>
+                  </div>
 
-                <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-zinc-500">
-                  {p.text}
-                </p>
+                  <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-zinc-500">
+                    {p.text}
+                  </p>
 
-                {/* Animated stats */}
-                <div className="mt-8 grid grid-cols-3 gap-3">
-                  {p.stats.map((s) => (
-                    <div
-                      key={s.label}
-                      className="rounded-xl bg-white/[0.03] p-4 text-center ring-1 ring-white/[0.04]"
-                    >
-                      <div className="text-xl font-black text-white sm:text-2xl">
-                        {"suffix" in s && s.suffix === "" ? (
-                          s.value
-                        ) : (
-                          <CountUp value={s.value} suffix={("suffix" in s ? s.suffix : undefined) ?? "+"} />
-                        )}
-                      </div>
-                      <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.15em] text-zinc-600">
-                        {s.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Architecture */}
-                <div className="mt-8">
-                  <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                    Architecture
-                  </h4>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {p.architecture.map((f) => (
+                  {/* Animated stats */}
+                  <div className="mt-6 grid grid-cols-3 gap-3">
+                    {p.stats.map((s) => (
                       <div
-                        key={f}
-                        className="flex items-center gap-2 text-[13px] text-zinc-400"
+                        key={s.label}
+                        className="rounded-xl bg-white/[0.03] p-3 text-center ring-1 ring-white/[0.04]"
                       >
-                        <svg
-                          className="h-3.5 w-3.5 shrink-0"
-                          style={{ color: p.color }}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                        {f}
+                        <div className="text-xl font-black text-white">
+                          {"suffix" in s && s.suffix === "" ? (
+                            s.value
+                          ) : (
+                            <CountUp
+                              value={s.value}
+                              suffix={
+                                ("suffix" in s ? s.suffix : undefined) ?? "+"
+                              }
+                            />
+                          )}
+                        </div>
+                        <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.15em] text-zinc-600">
+                          {s.label}
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
 
-                {/* Stack */}
-                <div className="mt-8">
-                  <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                    Stack
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {p.tech.map((t) => (
-                      <span
-                        key={t}
-                        className="rounded-md bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] text-zinc-500 ring-1 ring-white/[0.05] transition-colors hover:text-white"
-                      >
-                        {t}
-                      </span>
-                    ))}
+                  {/* Architecture */}
+                  <div className="mt-6">
+                    <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                      Architecture
+                    </h4>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {p.architecture.map((f) => (
+                        <div
+                          key={f}
+                          className="flex items-center gap-2 text-[13px] text-zinc-400"
+                        >
+                          <svg
+                            className="h-3.5 w-3.5 shrink-0"
+                            style={{ color: p.color }}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          {f}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Stack */}
+                  <div className="mt-6">
+                    <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                      Stack
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {p.tech.map((t) => (
+                        <span
+                          key={t}
+                          className="rounded-md bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] text-zinc-500 ring-1 ring-white/[0.05] transition-colors hover:text-white"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </Section>
+    </section>
   );
 }
 
@@ -1995,16 +2256,20 @@ function Footer() {
 export default function Home() {
   const spotlightRef = useCursorSpotlight();
   const { dotRef, ringRef } = useCustomCursor();
+  const active = useActiveSection(sectionIds);
 
   return (
     <div className="noise">
       <Curtain />
+      <DotGrid />
       <div ref={spotlightRef} className="cursor-spotlight" />
       <div ref={dotRef} className="cursor-dot" />
       <div ref={ringRef} className="cursor-ring" />
       <Nav />
+      <SideNav active={active} />
       <Hero />
       <TerminalStrip />
+      <MetricsBanner />
       <SectionDivider />
       <About />
       <SectionDivider />

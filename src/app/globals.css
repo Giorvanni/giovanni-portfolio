@@ -431,3 +431,145 @@ body {
   background: rgba(255,255,255,0.01);
   padding: 10px 0;
 }
+
+/* === Glitch effect === */
+@keyframes glitch-1 {
+  0%, 100% { clip-path: inset(40% 0 61% 0); transform: translate(-2px, 2px); }
+  20% { clip-path: inset(92% 0 1% 0); transform: translate(1px, -1px); }
+  40% { clip-path: inset(43% 0 1% 0); transform: translate(-1px, 3px); }
+  60% { clip-path: inset(25% 0 58% 0); transform: translate(3px, 1px); }
+  80% { clip-path: inset(54% 0 7% 0); transform: translate(-3px, -2px); }
+}
+@keyframes glitch-2 {
+  0%, 100% { clip-path: inset(65% 0 8% 0); transform: translate(3px, -1px); }
+  20% { clip-path: inset(17% 0 76% 0); transform: translate(-2px, 2px); }
+  40% { clip-path: inset(81% 0 2% 0); transform: translate(2px, -3px); }
+  60% { clip-path: inset(6% 0 84% 0); transform: translate(-3px, 1px); }
+  80% { clip-path: inset(39% 0 45% 0); transform: translate(1px, 2px); }
+}
+.glitch-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.glitch-wrapper:hover .glitch-layer {
+  opacity: 1;
+}
+.glitch-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.glitch-layer:nth-child(1) {
+  color: #0ff;
+  animation: glitch-1 0.3s infinite linear alternate-reverse;
+}
+.glitch-layer:nth-child(2) {
+  color: #f0f;
+  animation: glitch-2 0.3s infinite linear alternate-reverse;
+}
+
+/* === Horizontal scroll projects === */
+.horizontal-scroll-section {
+  position: relative;
+  overflow: hidden;
+}
+.horizontal-scroll-inner {
+  display: flex;
+  gap: 2rem;
+  padding: 0 2rem;
+}
+.horizontal-scroll-inner > * {
+  flex-shrink: 0;
+  width: min(85vw, 640px);
+}
+
+/* === Metrics banner === */
+@keyframes count-slide {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.metric-item {
+  position: relative;
+  overflow: hidden;
+}
+.metric-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 40%;
+  background: linear-gradient(to top, transparent, rgba(110,231,183,0.15));
+}
+.metric-item:last-child::after { display: none; }
+
+/* === Side nav dots === */
+.side-nav {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.side-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+  position: relative;
+}
+.side-dot::before {
+  content: attr(data-label);
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 11px;
+  color: #6ee7b7;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  transform: translateY(-50%) translateX(4px);
+  pointer-events: none;
+  font-family: var(--font-mono), monospace;
+}
+.side-dot:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+.side-dot.active {
+  background: #6ee7b7;
+  box-shadow: 0 0 12px 2px rgba(110,231,183,0.3);
+  transform: scale(1.4);
+}
+
+/* === Floating tech icons === */
+@keyframes float-icon {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33%      { transform: translateY(-12px) rotate(3deg); }
+  66%      { transform: translateY(6px) rotate(-2deg); }
+}
+.floating-icon {
+  position: absolute;
+  pointer-events: none;
+  font-size: 24px;
+  opacity: 0.12;
+  animation: float-icon 6s ease-in-out infinite;
+  filter: blur(0.5px);
+  z-index: 0;
+}
+
+/* === Dot grid canvas === */
+.dot-grid-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
