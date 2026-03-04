@@ -70,7 +70,7 @@ export default function RootLayout({
               },
               sameAs: [
                 "https://github.com/Giorvanni",
-                "https://www.linkedin.com/in/giovanni-bagmeijer/",
+                "https://www.linkedin.com/in/giovanni-bagmeijer-8744aa186/",
               ],
               worksFor: {
                 "@type": "Organization",
