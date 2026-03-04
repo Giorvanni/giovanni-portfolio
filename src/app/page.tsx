@@ -2153,79 +2153,48 @@ const projects = [
 ];
 
 function Projects() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    const track = trackRef.current;
-    if (!section || !track) return;
-
-    const onScroll = () => {
-      const rect = section.getBoundingClientRect();
-      const sectionH = section.offsetHeight;
-      const viewH = window.innerHeight;
-      const scrollable = sectionH - viewH;
-      if (scrollable <= 0) return;
-      const progress = Math.max(0, Math.min(1, -rect.top / scrollable));
-      const maxTranslate = track.scrollWidth - window.innerWidth;
-      track.style.transform = `translateX(${-progress * maxTranslate}px)`;
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <section
+    <Section
       id="projects"
-      ref={sectionRef}
-      className="horizontal-scroll-section relative"
-      style={{ height: `${100 + projects.length * 80}vh` }}
+      className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
+      watermark="Work"
     >
-      <div className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden">
-        <div className="mx-auto max-w-5xl px-5 pb-6 sm:px-8">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="h-px w-8 bg-accent/50" />
-            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-              Projects
-            </span>
-          </div>
-          <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-            <TextScramble text="Built from scratch" />
-          </h2>
-        </div>
+      <div className="mb-4 flex items-center gap-3">
+        <div className="h-px w-8 bg-accent/50" />
+        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+          Projects
+        </span>
+      </div>
+      <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+        <TextScramble text="Built from scratch" />
+      </h2>
 
-        <div
-          ref={trackRef}
-          className="horizontal-scroll-inner will-change-transform"
-          style={{ paddingLeft: "max(2rem, calc(50vw - 30rem))" }}
-        >
-          {projects.map((p, i) => {
-            const cs = useCardSpotlight();
-            return (
+      <div className="mt-14 flex flex-col gap-10">
+        {projects.map((p, i) => {
+          const cs = useCardSpotlight();
+          return (
+            <div
+              key={i}
+              ref={cs.ref}
+              onMouseMove={cs.onMove}
+              className="card group relative overflow-hidden"
+            >
+              <div className="card-spotlight" />
               <div
-                key={i}
-                ref={cs.ref}
-                onMouseMove={cs.onMove}
-                className="card group relative overflow-hidden"
-                style={{ width: "min(85vw, 640px)" }}
-              >
-                <div className="card-spotlight" />
-                <div
-                  className="h-[2px]"
-                  style={{
-                    background: `linear-gradient(90deg, ${p.color}, transparent 80%)`,
-                  }}
-                />
+                className="h-[2px]"
+                style={{
+                  background: `linear-gradient(90deg, ${p.color}, transparent 80%)`,
+                }}
+              />
 
-                <div
-                  className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full opacity-0 blur-[100px] transition-opacity duration-700 group-hover:opacity-100"
-                  style={{ background: p.color }}
-                />
+              <div
+                className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full opacity-0 blur-[100px] transition-opacity duration-700 group-hover:opacity-100"
+                style={{ background: p.color }}
+              />
 
-                <div className="relative z-10 p-6 sm:p-8">
+              <div className="relative z-10 p-6 sm:p-8 lg:p-10">
+                {/* Header row */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <h3 className="text-2xl font-bold text-white sm:text-3xl">
                       {p.title}
@@ -2233,115 +2202,9 @@ function Projects() {
                     <p className="mt-1 text-sm text-zinc-500">{p.sub}</p>
                   </div>
 
-                  <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-zinc-500">
-                    {p.text}
-                  </p>
-
-                  {/* Animated stats */}
-                  <div className="mt-6 grid grid-cols-3 gap-3">
-                    {p.stats.map((s) => (
-                      <div
-                        key={s.label}
-                        className="rounded-xl bg-white/[0.03] p-3 text-center ring-1 ring-white/[0.04]"
-                      >
-                        <div className="text-xl font-black text-white">
-                          {"suffix" in s && s.suffix === "" ? (
-                            s.value
-                          ) : (
-                            <CountUp
-                              value={s.value}
-                              suffix={
-                                ("suffix" in s ? s.suffix : undefined) ?? "+"
-                              }
-                            />
-                          )}
-                        </div>
-                        <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.15em] text-zinc-600">
-                          {s.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Architecture decisions */}
-                  <div className="mt-6">
-                    <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                      Architecture Decisions
-                    </h4>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {p.architecture.map((f) => (
-                        <div
-                          key={f}
-                          className="flex items-center gap-2 text-[13px] text-zinc-400"
-                        >
-                          <svg
-                            className="h-3.5 w-3.5 shrink-0"
-                            style={{ color: p.color }}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          {f}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Technical challenges */}
-                  {p.challenges && (
-                    <div className="mt-6">
-                      <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                        Technical Challenges Solved
-                      </h4>
-                      <div className="space-y-2">
-                        {p.challenges.map((c: string) => (
-                          <div
-                            key={c}
-                            className="flex items-start gap-2 text-[12px] leading-relaxed text-zinc-500"
-                          >
-                            <span
-                              className="mt-1.5 h-1 w-1 shrink-0 rounded-full"
-                              style={{ background: p.color, opacity: 0.6 }}
-                            />
-                            {c}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Impact */}
-                  {p.impact && (
-                    <div className="mt-6">
-                      <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: p.color, opacity: 0.7 }}>
-                        Impact
-                      </h4>
-                      <div className="space-y-1.5">
-                        {p.impact.map((item: string) => (
-                          <div
-                            key={item}
-                            className="flex items-start gap-2 text-[12px] leading-relaxed text-zinc-400"
-                          >
-                            <svg className="mt-0.5 h-3 w-3 shrink-0" style={{ color: p.color }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                            {item}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   {/* Links */}
                   {p.links && (
-                    <div className="mt-5 flex flex-wrap items-center gap-3">
+                    <div className="flex shrink-0 flex-wrap items-center gap-3">
                       {p.links.live && (
                         <a
                           href={p.links.live}
@@ -2361,30 +2224,145 @@ function Projects() {
                       )}
                     </div>
                   )}
+                </div>
 
-                  {/* Stack */}
-                  <div className="mt-5">
-                    <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                      Stack
-                    </h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {p.tech.map((t) => (
-                        <span
-                          key={t}
-                          className="rounded-md bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] text-zinc-500 ring-1 ring-white/[0.05] transition-colors hover:text-white"
-                        >
-                          {t}
-                        </span>
-                      ))}
+                <p className="mt-5 max-w-3xl text-[14px] leading-relaxed text-zinc-500">
+                  {p.text}
+                </p>
+
+                {/* Stats */}
+                <div className="mt-6 grid grid-cols-3 gap-3 sm:max-w-sm">
+                  {p.stats.map((s) => (
+                    <div
+                      key={s.label}
+                      className="rounded-xl bg-white/[0.03] p-3 text-center ring-1 ring-white/[0.04]"
+                    >
+                      <div className="text-xl font-black text-white">
+                        {"suffix" in s && s.suffix === "" ? (
+                          s.value
+                        ) : (
+                          <CountUp
+                            value={s.value}
+                            suffix={
+                              ("suffix" in s ? s.suffix : undefined) ?? "+"
+                            }
+                          />
+                        )}
+                      </div>
+                      <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.15em] text-zinc-600">
+                        {s.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Two-column detail grid */}
+                <div className="mt-8 grid gap-8 lg:grid-cols-2">
+                  {/* Left column */}
+                  <div className="space-y-6">
+                    {/* Architecture decisions */}
+                    <div>
+                      <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                        Architecture Decisions
+                      </h4>
+                      <div className="grid gap-2">
+                        {p.architecture.map((f) => (
+                          <div
+                            key={f}
+                            className="flex items-center gap-2 text-[13px] text-zinc-400"
+                          >
+                            <svg
+                              className="h-3.5 w-3.5 shrink-0"
+                              style={{ color: p.color }}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            {f}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Impact */}
+                    {p.impact && (
+                      <div>
+                        <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: p.color, opacity: 0.7 }}>
+                          Impact
+                        </h4>
+                        <div className="space-y-1.5">
+                          {p.impact.map((item: string) => (
+                            <div
+                              key={item}
+                              className="flex items-start gap-2 text-[12px] leading-relaxed text-zinc-400"
+                            >
+                              <svg className="mt-0.5 h-3 w-3 shrink-0" style={{ color: p.color }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                              </svg>
+                              {item}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right column */}
+                  <div className="space-y-6">
+                    {/* Technical challenges */}
+                    {p.challenges && (
+                      <div>
+                        <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                          Technical Challenges Solved
+                        </h4>
+                        <div className="space-y-2">
+                          {p.challenges.map((c: string) => (
+                            <div
+                              key={c}
+                              className="flex items-start gap-2 text-[12px] leading-relaxed text-zinc-500"
+                            >
+                              <span
+                                className="mt-1.5 h-1 w-1 shrink-0 rounded-full"
+                                style={{ background: p.color, opacity: 0.6 }}
+                              />
+                              {c}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Stack */}
+                    <div>
+                      <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                        Stack
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {p.tech.map((t) => (
+                          <span
+                            key={t}
+                            className="rounded-md bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] text-zinc-500 ring-1 ring-white/[0.05] transition-colors hover:text-white"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
-    </section>
+    </Section>
   );
 }
 
