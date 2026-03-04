@@ -760,6 +760,262 @@ function DotGrid() {
   return <canvas ref={canvasRef} className="dot-grid-canvas" />;
 }
 
+// ─── Aurora background canvas ──────────────────────────────────────
+function Aurora() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+
+    let id = 0;
+    let t = 0;
+
+    const resize = () => {
+      c.width = window.innerWidth;
+      c.height = window.innerHeight;
+    };
+    resize();
+
+    const draw = () => {
+      const w = c.width;
+      const h = c.height;
+      ctx.clearRect(0, 0, w, h);
+      t += 0.003;
+
+      const bands = [
+        { color: [110, 231, 183], yOff: 0.3, amp: 80, freq: 0.002, speed: 1, alpha: 0.04 },
+        { color: [167, 139, 250], yOff: 0.4, amp: 60, freq: 0.0015, speed: 1.3, alpha: 0.03 },
+        { color: [56, 189, 248], yOff: 0.5, amp: 100, freq: 0.001, speed: 0.8, alpha: 0.025 },
+        { color: [110, 231, 183], yOff: 0.6, amp: 50, freq: 0.0025, speed: 1.5, alpha: 0.02 },
+      ];
+
+      for (const band of bands) {
+        ctx.beginPath();
+        const baseY = h * band.yOff;
+        ctx.moveTo(0, h);
+
+        for (let x = 0; x <= w; x += 3) {
+          const wave1 = Math.sin(x * band.freq + t * band.speed) * band.amp;
+          const wave2 = Math.sin(x * band.freq * 2.3 + t * band.speed * 0.7) * band.amp * 0.4;
+          const wave3 = Math.cos(x * band.freq * 0.5 + t * band.speed * 1.2) * band.amp * 0.3;
+          const y = baseY + wave1 + wave2 + wave3;
+          ctx.lineTo(x, y);
+        }
+
+        ctx.lineTo(w, h);
+        ctx.closePath();
+
+        const grad = ctx.createLinearGradient(0, baseY - band.amp * 1.5, 0, baseY + band.amp * 2);
+        grad.addColorStop(0, `rgba(${band.color[0]},${band.color[1]},${band.color[2]},0)`);
+        grad.addColorStop(0.3, `rgba(${band.color[0]},${band.color[1]},${band.color[2]},${band.alpha})`);
+        grad.addColorStop(0.6, `rgba(${band.color[0]},${band.color[1]},${band.color[2]},${band.alpha * 0.6})`);
+        grad.addColorStop(1, `rgba(${band.color[0]},${band.color[1]},${band.color[2]},0)`);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+
+      id = requestAnimationFrame(draw);
+    };
+
+    draw();
+    window.addEventListener("resize", resize, { passive: true });
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="aurora-canvas" />;
+}
+
+// ─── Beam divider ──────────────────────────────────────────────────
+function BeamDivider() {
+  return <div className="beam-divider mx-5 sm:mx-8" />;
+}
+
+// ─── "Currently building" status widget ────────────────────────────
+function StatusWidget() {
+  const [idx, setIdx] = useState(0);
+  const items = [
+    { label: "Beyond Bricks", detail: "SaaS \u2013 service cost platform" },
+    { label: "Sentinel", detail: "R&D \u2013 market intelligence" },
+    { label: "This Portfolio", detail: "Next.js + interactive canvas" },
+  ];
+
+  useEffect(() => {
+    const iv = setInterval(() => setIdx((p) => (p + 1) % items.length), 3000);
+    return () => clearInterval(iv);
+  }, [items.length]);
+
+  return (
+    <div className="status-widget">
+      <div className="mb-1 flex items-center gap-2">
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-accent" style={{ animation: "pulse-ring 2s ease-out infinite" }} />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+        </span>
+        <span className="text-zinc-500">currently building</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-accent">$</span>
+        <span
+          className="text-white transition-opacity duration-300"
+          key={idx}
+          style={{ animation: "fade-up 0.4s forwards" }}
+        >
+          {items[idx].label}
+        </span>
+        <span className="text-zinc-600">{items[idx].detail}</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Skill radar canvas visualization ──────────────────────────────
+function SkillRadar() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { ref: wrapRef, visible } = useReveal(0.3);
+  const animProgress = useRef(0);
+
+  useEffect(() => {
+    const c = canvasRef.current;
+    if (!c || !visible) return;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const size = Math.min(c.offsetWidth, 500);
+    c.width = size * dpr;
+    c.height = size * dpr;
+    c.style.width = `${size}px`;
+    c.style.height = `${size}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const skills = [
+      { name: "React/Next.js", level: 0.92 },
+      { name: "TypeScript", level: 0.9 },
+      { name: "Node.js", level: 0.85 },
+      { name: "PostgreSQL", level: 0.82 },
+      { name: "System Design", level: 0.88 },
+      { name: "Python", level: 0.72 },
+      { name: "DevOps", level: 0.7 },
+      { name: "LLM/AI", level: 0.65 },
+    ];
+
+    const cx = size / 2;
+    const cy = size / 2;
+    const maxR = size * 0.38;
+    const n = skills.length;
+    let id = 0;
+    const startTime = performance.now();
+    const duration = 1200;
+
+    const draw = (now: number) => {
+      const elapsed = now - startTime;
+      animProgress.current = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - animProgress.current, 3);
+      ctx.clearRect(0, 0, size, size);
+
+      // Grid rings
+      for (let ring = 1; ring <= 4; ring++) {
+        const r = (maxR / 4) * ring;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255,255,255,${ring === 4 ? 0.06 : 0.03})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Axis lines
+      for (let i = 0; i < n; i++) {
+        const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(angle) * maxR, cy + Math.sin(angle) * maxR);
+        ctx.strokeStyle = "rgba(255,255,255,0.04)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Data polygon
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
+        const r = maxR * skills[i].level * ease;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+      grad.addColorStop(0, "rgba(110,231,183,0.15)");
+      grad.addColorStop(1, "rgba(110,231,183,0.03)");
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.strokeStyle = "rgba(110,231,183,0.5)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Data points + labels
+      for (let i = 0; i < n; i++) {
+        const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
+        const r = maxR * skills[i].level * ease;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+
+        // Dot
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "#6ee7b7";
+        ctx.fill();
+
+        // Glow
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(110,231,183,0.2)";
+        ctx.fill();
+
+        // Label
+        const labelR = maxR + 18;
+        const lx = cx + Math.cos(angle) * labelR;
+        const ly = cy + Math.sin(angle) * labelR;
+        ctx.font = "11px var(--font-mono), monospace";
+        ctx.fillStyle = `rgba(161,161,170,${ease})`;
+        ctx.textAlign = Math.abs(angle) < 0.1 || Math.abs(angle - Math.PI) < 0.1 ? "center" : Math.cos(angle) > 0 ? "left" : "right";
+        ctx.textBaseline = "middle";
+        ctx.fillText(skills[i].name, lx, ly);
+
+        // Percentage
+        const pctR = maxR * skills[i].level * ease + 14;
+        const px = cx + Math.cos(angle) * pctR;
+        const py = cy + Math.sin(angle) * pctR;
+        ctx.font = "bold 9px var(--font-mono), monospace";
+        ctx.fillStyle = `rgba(110,231,183,${ease * 0.6})`;
+        ctx.fillText(`${Math.round(skills[i].level * 100 * ease)}%`, px, py + (Math.sin(angle) > 0 ? 12 : -10));
+      }
+
+      if (animProgress.current < 1) id = requestAnimationFrame(draw);
+    };
+
+    id = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(id);
+  }, [visible]);
+
+  return (
+    <div ref={wrapRef}>
+      <canvas
+        ref={canvasRef}
+        className="skill-radar-canvas mx-auto"
+        style={{ opacity: visible ? 1 : 0, transition: "opacity 0.6s" }}
+      />
+    </div>
+  );
+}
+
 // ─── Glitch text wrapper ───────────────────────────────────────────
 function GlitchText({
   children,
@@ -1558,6 +1814,17 @@ function Hero() {
         </div>
       </div>
 
+      {/* Status widget — desktop only */}
+      <div
+        className="absolute bottom-24 left-8 z-10 hidden lg:block xl:left-[calc(50vw-520px)]"
+        style={{
+          opacity: 0,
+          animation: "fade-up 0.8s 2.2s forwards",
+        }}
+      >
+        <StatusWidget />
+      </div>
+
       {/* Scroll hint */}
       <div
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
@@ -1732,53 +1999,63 @@ function Experience() {
         <TextScramble text="Where I've worked" />
       </h2>
 
-      <div className="mt-14 flex flex-col gap-6">
-        {jobs.map((job, i) => (
-          <SpotlightCard
-            key={i}
-            className="group relative overflow-hidden p-6 sm:p-8"
-          >
-            {job.current && (
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
-            )}
+      <div className="relative mt-14 pl-10 sm:pl-12">
+        {/* Vertical timeline line */}
+        <div className="timeline-line" />
 
-            <div className="relative z-10">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2.5">
-                    <h3 className="text-lg font-semibold text-white">
-                      {job.role}
-                    </h3>
-                    {job.current && (
-                      <span className="rounded-full bg-accent/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent ring-1 ring-accent/20">
-                        Current
-                      </span>
-                    )}
+        <div className="flex flex-col gap-10">
+          {jobs.map((job, i) => (
+            <div key={i} className="relative">
+              {/* Timeline dot */}
+              <div
+                className={`timeline-dot ${job.current ? "active" : ""}`}
+                style={{ top: "6px" }}
+              />
+
+              <SpotlightCard className="group relative overflow-hidden p-6 sm:p-8">
+                {job.current && (
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
+                )}
+
+                <div className="relative z-10">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <h3 className="text-lg font-semibold text-white">
+                          {job.role}
+                        </h3>
+                        {job.current && (
+                          <span className="rounded-full bg-accent/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent ring-1 ring-accent/20">
+                            Current
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-sm text-zinc-500">{job.company}</p>
+                    </div>
+                    <span className="shrink-0 font-mono text-xs tabular-nums text-zinc-600 sm:text-sm">
+                      {job.period}
+                    </span>
                   </div>
-                  <p className="mt-0.5 text-sm text-zinc-500">{job.company}</p>
+
+                  <p className="mt-4 text-[13px] leading-relaxed text-zinc-500 sm:text-sm">
+                    {job.text}
+                  </p>
+
+                  <div className="mt-5 flex flex-wrap gap-1.5">
+                    {job.tags.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-md bg-white/[0.04] px-2.5 py-1 text-[11px] text-zinc-500 ring-1 ring-white/[0.06]"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <span className="shrink-0 text-xs tabular-nums text-zinc-600 sm:text-sm">
-                  {job.period}
-                </span>
-              </div>
-
-              <p className="mt-4 text-[13px] leading-relaxed text-zinc-500 sm:text-sm">
-                {job.text}
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-1.5">
-                {job.tags.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-md bg-white/[0.04] px-2.5 py-1 text-[11px] text-zinc-500 ring-1 ring-white/[0.06]"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
+              </SpotlightCard>
             </div>
-          </SpotlightCard>
-        ))}
+          ))}
+        </div>
       </div>
     </Section>
   );
@@ -2103,6 +2380,11 @@ function Skills() {
         </h2>
       </div>
 
+      {/* Skill radar visualization */}
+      <div className="mx-auto mt-12 max-w-5xl px-5 sm:px-8">
+        <SkillRadar />
+      </div>
+
       <div className="mt-14 flex flex-col gap-4">
         <Marquee items={row1} />
         <div style={{ direction: "rtl" }}>
@@ -2121,109 +2403,69 @@ function Contact() {
   return (
     <Section
       id="contact"
-      className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
+      className="relative flex min-h-[80vh] items-center justify-center px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
     >
-      <div className="mx-auto max-w-xl text-center">
-        <div className="mb-4 flex items-center justify-center gap-3">
-          <div className="h-px w-8 bg-accent/50" />
+      {/* Massive gradient glow */}
+      <div className="contact-glow" />
+
+      <div className="relative z-10 mx-auto max-w-2xl text-center">
+        <div className="mb-6 flex items-center justify-center gap-3">
+          <div className="h-px w-12 bg-accent/50" />
           <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
             Contact
           </span>
-          <div className="h-px w-8 bg-accent/50" />
+          <div className="h-px w-12 bg-accent/50" />
         </div>
 
-        <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-          <TextScramble text="Let's talk" />
+        <h2 className="text-5xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl">
+          <TextScramble text="Let's build" />
+          <br />
+          <span className="shimmer-text">
+            <TextScramble text="something great" />
+          </span>
         </h2>
 
-        <p className="mt-4 text-sm leading-relaxed text-zinc-500 sm:text-base">
-          Interested in collaborating or building something ambitious?
+        <p className="mx-auto mt-6 max-w-md text-base leading-relaxed text-zinc-500 sm:text-lg">
+          Whether you want to collaborate on ambitious projects or just talk shop about architecture and systems.
         </p>
 
-        <div className="mt-10 grid gap-3 sm:grid-cols-2">
-          <SpotlightCard className="group flex items-center gap-4 p-5 text-left">
-            <a
-              href="mailto:g.bagmeijer@gmail.com"
-              className="relative z-10 flex w-full items-center gap-4"
-            >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/[0.08] text-accent transition-colors group-hover:bg-accent/20">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
-              <div className="min-w-0">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-600">
-                  Email
-                </div>
-                <div className="mt-0.5 truncate text-sm text-zinc-400 transition-colors group-hover:text-accent">
-                  g.bagmeijer@gmail.com
-                </div>
-              </div>
-            </a>
-          </SpotlightCard>
-          <SpotlightCard className="group flex items-center gap-4 p-5 text-left">
-            <a
-              href="tel:+31645073445"
-              className="relative z-10 flex w-full items-center gap-4"
-            >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/[0.08] text-accent transition-colors group-hover:bg-accent/20">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                  />
-                </svg>
-              </div>
-              <div className="min-w-0">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-600">
-                  Phone
-                </div>
-                <div className="mt-0.5 text-sm text-zinc-400 transition-colors group-hover:text-accent">
-                  06-45073445
-                </div>
-              </div>
-            </a>
-          </SpotlightCard>
+        {/* Big CTA button */}
+        <div className="mt-10">
+          <a
+            href="mailto:g.bagmeijer@gmail.com"
+            className="group inline-flex items-center gap-3 rounded-2xl bg-white px-10 py-5 text-lg font-bold text-black transition-all hover:bg-accent hover:shadow-[0_0_60px_-8px_rgba(110,231,183,0.4)]"
+          >
+            <svg className="h-5 w-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Get in Touch
+          </a>
         </div>
 
-        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-zinc-600">
-          <svg
-            className="h-3.5 w-3.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-          Nijmegen, The Netherlands
+        {/* Contact details */}
+        <div className="mt-12 grid gap-4 sm:grid-cols-3">
+          <a href="mailto:g.bagmeijer@gmail.com" className="group flex flex-col items-center gap-2 rounded-xl border border-white/[0.04] bg-white/[0.02] p-5 transition-all hover:border-accent/20 hover:bg-accent/[0.04]">
+            <svg className="h-5 w-5 text-zinc-600 transition-colors group-hover:text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-600">Email</span>
+            <span className="text-sm text-zinc-400 transition-colors group-hover:text-accent">g.bagmeijer@gmail.com</span>
+          </a>
+          <a href="tel:+31645073445" className="group flex flex-col items-center gap-2 rounded-xl border border-white/[0.04] bg-white/[0.02] p-5 transition-all hover:border-accent/20 hover:bg-accent/[0.04]">
+            <svg className="h-5 w-5 text-zinc-600 transition-colors group-hover:text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-600">Phone</span>
+            <span className="text-sm text-zinc-400 transition-colors group-hover:text-accent">06-45073445</span>
+          </a>
+          <div className="group flex flex-col items-center gap-2 rounded-xl border border-white/[0.04] bg-white/[0.02] p-5">
+            <svg className="h-5 w-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-600">Location</span>
+            <span className="text-sm text-zinc-400">Nijmegen, NL</span>
+          </div>
         </div>
       </div>
     </Section>
@@ -2261,6 +2503,7 @@ export default function Home() {
   return (
     <div className="noise">
       <Curtain />
+      <Aurora />
       <DotGrid />
       <div ref={spotlightRef} className="cursor-spotlight" />
       <div ref={dotRef} className="cursor-dot" />
@@ -2270,19 +2513,19 @@ export default function Home() {
       <Hero />
       <TerminalStrip />
       <MetricsBanner />
-      <SectionDivider />
+      <BeamDivider />
       <About />
-      <SectionDivider />
+      <BeamDivider />
       <Approach />
-      <SectionDivider />
+      <BeamDivider />
       <Experience />
-      <SectionDivider />
+      <BeamDivider />
       <Projects />
-      <SectionDivider />
+      <BeamDivider />
       <Systems />
-      <SectionDivider />
+      <BeamDivider />
       <Skills />
-      <SectionDivider />
+      <BeamDivider />
       <Contact />
       <Footer />
     </div>
