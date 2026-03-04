@@ -528,6 +528,9 @@ body {
   transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   cursor: pointer;
   position: relative;
+  padding: 18px;
+  margin: -18px;
+  background-clip: content-box;
 }
 .side-dot::before {
   content: attr(data-label);
@@ -552,6 +555,7 @@ body {
   background: #6ee7b7;
   box-shadow: 0 0 12px 2px rgba(110,231,183,0.3);
   transform: scale(1.4);
+  background-clip: content-box;
 }
 
 /* === Floating tech icons === */
