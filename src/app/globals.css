@@ -704,3 +704,138 @@ body {
   pointer-events: none;
   user-select: none;
 }
+
+/* === Architecture Diagram === */
+.arch-diagram {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.arch-layer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.arch-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(110, 231, 183, 0.4);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(110, 231, 183, 0.04);
+}
+
+.arch-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.arch-box {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 14px 18px;
+  background: var(--color-surface);
+  text-align: center;
+  min-width: 140px;
+  flex: 1;
+  max-width: 260px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.arch-box:hover {
+  border-color: rgba(110, 231, 183, 0.15);
+  box-shadow: 0 0 20px -4px rgba(110, 231, 183, 0.08);
+}
+
+.arch-box-client {
+  border-color: rgba(110, 231, 183, 0.12);
+  max-width: 300px;
+}
+.arch-box-edge {
+  border-color: rgba(167, 139, 250, 0.1);
+  max-width: 420px;
+}
+.arch-box-app {
+  border-color: rgba(56, 189, 248, 0.08);
+}
+.arch-box-data {
+  border-color: rgba(110, 231, 183, 0.1);
+}
+.arch-box-service {
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+.arch-box-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6px;
+  color: rgba(110, 231, 183, 0.5);
+}
+
+.arch-box-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+.arch-box-sub {
+  font-size: 10px;
+  color: rgba(161, 161, 170, 0.6);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.arch-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0;
+}
+.arch-arrow-line {
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(to bottom, rgba(110, 231, 183, 0.3), rgba(110, 231, 183, 0.08));
+  position: relative;
+}
+.arch-arrow-line::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 4px solid rgba(110, 231, 183, 0.3);
+}
+.arch-arrow-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 8px;
+  color: rgba(161, 161, 170, 0.3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .arch-row {
+    flex-direction: column;
+    align-items: center;
+  }
+  .arch-box {
+    max-width: 100%;
+    width: 100%;
+  }
+}

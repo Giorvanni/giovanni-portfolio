@@ -1121,11 +1121,11 @@ function MetricsBanner() {
 function SideNav({ active }: { active: string }) {
   const items = [
     { id: "about", label: "about" },
-    { id: "approach", label: "approach" },
+    { id: "principles", label: "principles" },
     { id: "experience", label: "experience" },
     { id: "projects", label: "projects" },
-    { id: "systems", label: "systems" },
-    { id: "skills", label: "skills" },
+    { id: "architecture", label: "architecture" },
+    { id: "technologies", label: "technologies" },
     { id: "contact", label: "contact" },
   ];
 
@@ -1525,11 +1525,11 @@ function Curtain() {
 
 const sectionIds = [
   "about",
-  "approach",
+  "principles",
   "experience",
   "projects",
-  "systems",
-  "skills",
+  "architecture",
+  "technologies",
   "contact",
 ];
 
@@ -1562,10 +1562,11 @@ function Nav() {
 
   const links = [
     { href: "#about", label: "About", id: "about" },
-    { href: "#approach", label: "Approach", id: "approach" },
+    { href: "#principles", label: "Principles", id: "principles" },
     { href: "#experience", label: "Experience", id: "experience" },
     { href: "#projects", label: "Projects", id: "projects" },
-    { href: "#skills", label: "Skills", id: "skills" },
+    { href: "#architecture", label: "Architecture", id: "architecture" },
+    { href: "#technologies", label: "Technologies", id: "technologies" },
     { href: "#contact", label: "Contact", id: "contact" },
   ];
 
@@ -1900,34 +1901,39 @@ function About() {
    ENGINEERING APPROACH
    ================================================================ */
 
-const approachItems = [
-  { label: "Design once, reuse at scale", sub: "Generator-driven development" },
-  { label: "Data structure over surface features", sub: "Schema-first thinking" },
-  { label: "Architecture for long-term maintainability", sub: "Reduce future cost" },
-  { label: "Automate marginal development cost", sub: "Compounding efficiency" },
-  { label: "Production constraints from day one", sub: "Ship real software" },
-  { label: "Software as infrastructure", sub: "Not experiments" },
+const principleItems = [
+  { label: "Simplicity scales", sub: "Minimise moving parts. Every abstraction earns its keep or gets removed." },
+  { label: "Data structures define capability", sub: "Get the schema right and the features follow. Schema-first thinking, always." },
+  { label: "Maintainability beats velocity", sub: "Code that\u2019s easy to change is more valuable than code that shipped fast." },
+  { label: "Automate the marginal cost", sub: "Generator-driven development. If I\u2019m doing it twice, I build a system for it." },
+  { label: "Production constraints from day one", sub: "Auth, rate limiting, error handling, monitoring\u2014shipped from the first commit." },
+  { label: "Software as infrastructure", sub: "Not experiments. Every system is designed to outlast its current requirements." },
 ];
 
-function Approach() {
+function Principles() {
   return (
     <Section
-      id="approach"
+      id="principles"
       className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
     >
       <div className="mb-4 flex items-center gap-3">
         <div className="h-px w-8 bg-accent/50" />
         <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-          Engineering Approach
+          Engineering Principles
         </span>
       </div>
 
       <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-        <TextScramble text="How I build" />
+        <TextScramble text="How I think about software" />
       </h2>
 
+      <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-zinc-500">
+        These aren&apos;t buzzwords. They&apos;re the decision filters I use on every technical
+        choice, from database schema design to deployment strategy.
+      </p>
+
       <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {approachItems.map((item, i) => (
+        {principleItems.map((item, i) => (
           <SpotlightCard key={i} className="flex flex-col gap-2 p-5">
             <div className="relative z-10">
               <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-accent/[0.08] font-mono text-xs font-bold text-accent">
@@ -1936,7 +1942,7 @@ function Approach() {
               <h3 className="text-[14px] font-semibold text-white">
                 {item.label}
               </h3>
-              <p className="mt-1 text-[12px] text-zinc-600">{item.sub}</p>
+              <p className="mt-1.5 text-[12px] leading-relaxed text-zinc-600">{item.sub}</p>
             </div>
           </SpotlightCard>
         ))}
@@ -2069,47 +2075,78 @@ const projects = [
   {
     title: "Beyond Bricks",
     sub: "Service Cost Management SaaS Platform",
-    text: "Designed and built a complete SaaS platform for digitally managing and settling service costs in the rental sector. Architecture, backend, frontend, security, payments, hosting. All from scratch.",
+    text: "Sole engineer. Designed and shipped a production SaaS platform for Dutch property managers to digitally generate, deliver, and collect service charge settlements. Full ownership: architecture, backend, frontend, security, payments, deployment.",
     stats: [
       { value: 52, label: "API Routes" },
       { value: 24, label: "DB Models" },
       { value: 6, label: "Integrations" },
     ],
     architecture: [
-      "RBAC system",
-      "Mollie payments + secure webhooks",
-      "Rate limiting & CSRF protection",
-      "PDF generation + email automation",
-      "Admin monitoring dashboard",
-      "Multi-tenant data isolation",
+      "RBAC with JWT sessions + middleware-level guards",
+      "HMAC-verified Mollie payment webhooks",
+      "Rate limiting per-route (IP + user scoping)",
+      "PDF generation + automated email delivery (AWS SES)",
+      "Admin audit logging + monitoring dashboard",
+      "Multi-tenant data isolation at query level",
     ],
+    challenges: [
+      "Designed a multi-tenant data model where all queries enforce user-scoped access\u2014no data leaks between accounts",
+      "Built an idempotent Mollie webhook handler with HMAC signature verification to prevent replay attacks",
+      "Implemented tiered rate limiting (5/15min login, 100/min API) without external infra using in-memory token buckets",
+      "Created a generator-based PDF settlement system that handles variable cost categories and distribution methods",
+    ],
+    impact: [
+      "Eliminated manual Excel-based settlement process for property managers",
+      "End-to-end automated: generation \u2192 PDF \u2192 email delivery \u2192 payment collection",
+      "Pay-per-use model (\u20ac75/tenant/settlement) \u2013 zero upfront cost for customers",
+      "Production-live with real paying customers at servicekosten.beyondbricks.nl",
+    ],
+    links: {
+      live: "https://servicekosten.beyondbricks.nl",
+      note: "Private repo \u2013 architecture docs available on request",
+    },
     tech: [
-      "Next.js",
+      "Next.js 15",
       "TypeScript",
-      "Prisma",
+      "Prisma 6",
       "PostgreSQL",
-      "Redis",
-      "Tailwind",
+      "Auth.js 5",
+      "Tailwind 4",
       "Vercel",
       "Mollie",
+      "AWS SES",
+      "Sentry",
     ],
     color: "#6ee7b7",
   },
   {
     title: "Sentinel",
     sub: "Autonomous Market Intelligence System (R&D)",
-    text: "A research-driven platform for automated competitive and market analysis. Designed to ingest signals, classify strategic movement, and surface actionable intelligence.",
+    text: "Designing a research-driven platform for automated competitive and market analysis. Ingests signals from public sources, classifies strategic movement, and surfaces actionable intelligence for internal decision-makers.",
     stats: [
       { value: 4, label: "Pipelines" },
       { value: 3, label: "LLM Models" },
       { value: 1, label: "Prototype", suffix: "" },
     ],
     architecture: [
-      "Async pipeline processing",
-      "Signal classification & scoring",
-      "LLM-powered semantic analysis",
-      "Serverless task orchestration",
+      "Async pipeline processing with backpressure control",
+      "Signal classification & scoring engine",
+      "LLM-powered semantic analysis (multi-model)",
+      "Serverless task orchestration on event triggers",
     ],
+    challenges: [
+      "Designing a classification layer that distinguishes noise from strategic signal across unstructured sources",
+      "Managing LLM cost vs. accuracy trade-offs with a tiered model routing strategy",
+      "Building fault-tolerant pipelines that retry gracefully without duplicate processing",
+    ],
+    impact: [
+      "Replaces hours of manual competitive research per week",
+      "Structured intelligence output usable by non-technical stakeholders",
+      "Modular pipeline design allows adding new signal sources without rewriting core logic",
+    ],
+    links: {
+      note: "Internal R&D \u2013 architecture overview available on request",
+    },
     tech: ["Python", "Docker", "AWS SQS", "LLM APIs", "PostgreSQL"],
     color: "#a78bfa",
   },
@@ -2226,10 +2263,10 @@ function Projects() {
                     ))}
                   </div>
 
-                  {/* Architecture */}
+                  {/* Architecture decisions */}
                   <div className="mt-6">
                     <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                      Architecture
+                      Architecture Decisions
                     </h4>
                     <div className="grid gap-2 sm:grid-cols-2">
                       {p.architecture.map((f) => (
@@ -2257,16 +2294,84 @@ function Projects() {
                     </div>
                   </div>
 
+                  {/* Technical challenges */}
+                  {p.challenges && (
+                    <div className="mt-6">
+                      <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                        Technical Challenges Solved
+                      </h4>
+                      <div className="space-y-2">
+                        {p.challenges.map((c: string) => (
+                          <div
+                            key={c}
+                            className="flex items-start gap-2 text-[12px] leading-relaxed text-zinc-500"
+                          >
+                            <span
+                              className="mt-1.5 h-1 w-1 shrink-0 rounded-full"
+                              style={{ background: p.color, opacity: 0.6 }}
+                            />
+                            {c}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Impact */}
+                  {p.impact && (
+                    <div className="mt-6">
+                      <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: p.color, opacity: 0.7 }}>
+                        Impact
+                      </h4>
+                      <div className="space-y-1.5">
+                        {p.impact.map((item: string) => (
+                          <div
+                            key={item}
+                            className="flex items-start gap-2 text-[12px] leading-relaxed text-zinc-400"
+                          >
+                            <svg className="mt-0.5 h-3 w-3 shrink-0" style={{ color: p.color }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Links */}
+                  {p.links && (
+                    <div className="mt-5 flex flex-wrap items-center gap-3">
+                      {p.links.live && (
+                        <a
+                          href={p.links.live}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold ring-1 transition-all hover:bg-white/[0.04]"
+                          style={{ color: p.color, borderColor: `${p.color}33` }}
+                        >
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                          Live Site
+                        </a>
+                      )}
+                      {p.links.note && (
+                        <span className="text-[10px] italic text-zinc-600">
+                          {p.links.note}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   {/* Stack */}
-                  <div className="mt-6">
+                  <div className="mt-5">
                     <h4 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
                       Stack
                     </h4>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {p.tech.map((t) => (
                         <span
                           key={t}
-                          className="rounded-md bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] text-zinc-500 ring-1 ring-white/[0.05] transition-colors hover:text-white"
+                          className="rounded-md bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] text-zinc-500 ring-1 ring-white/[0.05] transition-colors hover:text-white"
                         >
                           {t}
                         </span>
@@ -2332,6 +2437,174 @@ function Systems() {
 }
 
 /* ================================================================
+   ARCHITECTURE DEEP DIVE
+   ================================================================ */
+
+function ArchitectureDeepDive() {
+  return (
+    <Section
+      id="architecture"
+      className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
+      watermark="Arch"
+    >
+      <div className="mb-4 flex items-center gap-3">
+        <div className="h-px w-8 bg-accent/50" />
+        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+          Architecture Deep Dive
+        </span>
+      </div>
+
+      <h2 className="max-w-2xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+        <TextScramble text="Case study: Beyond Bricks" />
+      </h2>
+
+      <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-zinc-500">
+        A production SaaS platform serving Dutch property managers. Full system
+        ownership from database schema to payment processing. Here&apos;s how the
+        system is architected.
+      </p>
+
+      {/* Architecture diagram */}
+      <div className="arch-diagram mt-14">
+        {/* Client layer */}
+        <div className="arch-layer">
+          <div className="arch-label">Client</div>
+          <div className="arch-box arch-box-client">
+            <div className="arch-box-title">Browser</div>
+            <div className="arch-box-sub">React 19 + Server Components</div>
+          </div>
+        </div>
+
+        <div className="arch-arrow">
+          <div className="arch-arrow-line" />
+          <div className="arch-arrow-label">HTTPS</div>
+        </div>
+
+        {/* Edge layer */}
+        <div className="arch-layer">
+          <div className="arch-label">Edge</div>
+          <div className="arch-box arch-box-edge">
+            <div className="arch-box-title">Vercel Edge Network</div>
+            <div className="arch-box-sub">CDN + Middleware (Auth guards, security headers, rate limiting)</div>
+          </div>
+        </div>
+
+        <div className="arch-arrow">
+          <div className="arch-arrow-line" />
+        </div>
+
+        {/* Application layer */}
+        <div className="arch-layer">
+          <div className="arch-label">App</div>
+          <div className="arch-row">
+            <div className="arch-box arch-box-app">
+              <div className="arch-box-title">Auth Layer</div>
+              <div className="arch-box-sub">Auth.js 5 \u00b7 JWT Sessions \u00b7 RBAC</div>
+            </div>
+            <div className="arch-box arch-box-app">
+              <div className="arch-box-title">API Routes</div>
+              <div className="arch-box-sub">20+ route groups \u00b7 Zod validation</div>
+            </div>
+            <div className="arch-box arch-box-app">
+              <div className="arch-box-title">Business Logic</div>
+              <div className="arch-box-sub">Settlements \u00b7 PDF gen \u00b7 Invoicing</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="arch-arrow">
+          <div className="arch-arrow-line" />
+        </div>
+
+        {/* Data & services layer */}
+        <div className="arch-layer">
+          <div className="arch-label">Data</div>
+          <div className="arch-row">
+            <div className="arch-box arch-box-data">
+              <div className="arch-box-icon">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" /></svg>
+              </div>
+              <div className="arch-box-title">PostgreSQL</div>
+              <div className="arch-box-sub">Neon.tech \u00b7 24 models \u00b7 Prisma 6</div>
+            </div>
+            <div className="arch-box arch-box-service">
+              <div className="arch-box-icon">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+              </div>
+              <div className="arch-box-title">Mollie</div>
+              <div className="arch-box-sub">iDEAL \u00b7 HMAC webhooks</div>
+            </div>
+            <div className="arch-box arch-box-service">
+              <div className="arch-box-icon">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+              </div>
+              <div className="arch-box-title">AWS SES</div>
+              <div className="arch-box-sub">Transactional email</div>
+            </div>
+            <div className="arch-box arch-box-service">
+              <div className="arch-box-icon">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+              </div>
+              <div className="arch-box-title">Sentry</div>
+              <div className="arch-box-sub">Error monitoring</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Technical decisions */}
+      <div className="mt-16 grid gap-6 sm:grid-cols-2">
+        <div>
+          <h3 className="mb-4 text-sm font-semibold text-white">Key Technical Decisions</h3>
+          <div className="space-y-3">
+            {[
+              { q: "Why JWT over database sessions?", a: "Stateless scaling on serverless. No DB lookup per request. 30-day sliding window with HTTP-only cookies." },
+              { q: "Why Prisma over raw SQL?", a: "Type-safe queries generated from schema. Automatic TS types. Seamless migrations. Connection pooling for serverless." },
+              { q: "Why Mollie over Stripe?", a: "Native iDEAL support for Dutch market. Lower friction for local property managers. Simpler webhook model." },
+            ].map((item) => (
+              <div key={item.q} className="rounded-xl bg-white/[0.02] p-4 ring-1 ring-white/[0.04]">
+                <div className="text-[13px] font-medium text-zinc-300">{item.q}</div>
+                <div className="mt-1.5 text-[12px] leading-relaxed text-zinc-600">{item.a}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="mb-4 text-sm font-semibold text-white">Performance & Scalability</h3>
+          <div className="space-y-3">
+            {[
+              { label: "Stateless API layer", detail: "Every API route is independently deployable. No shared state between requests." },
+              { label: "PostgreSQL as source of truth", detail: "Enforced referential integrity, cascading deletes, and user-scoped queries at the ORM level." },
+              { label: "Rate limiting without Redis", detail: "In-memory token bucket per route. 5 login/15min, 100 API/min. Resets on cold start (acceptable for current scale)." },
+              { label: "Edge middleware", detail: "Auth validation, security headers, and CORS enforcement happen at the edge before hitting the app." },
+            ].map((item) => (
+              <div key={item.label} className="rounded-xl bg-white/[0.02] p-4 ring-1 ring-white/[0.04]">
+                <div className="text-[13px] font-medium text-zinc-300">{item.label}</div>
+                <div className="mt-1.5 text-[12px] leading-relaxed text-zinc-600">{item.detail}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Architecture doc CTA */}
+      <div className="mt-12 flex items-center gap-4 rounded-xl border border-white/[0.04] bg-white/[0.02] p-5">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/[0.08]">
+          <svg className="h-5 w-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div>
+          <div className="text-sm font-medium text-white">Full architecture documentation available</div>
+          <div className="mt-0.5 text-[12px] text-zinc-600">976-line system doc covering database schema, security model, API reference, deployment pipeline, and integration specs. Available on request.</div>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/* ================================================================
    SKILLS (Marquee)
    ================================================================ */
 
@@ -2357,14 +2630,14 @@ const allSkills = [
   "Automation",
 ];
 
-function Skills() {
+function Technologies() {
   const half = Math.ceil(allSkills.length / 2);
   const row1 = allSkills.slice(0, half);
   const row2 = allSkills.slice(half);
 
   return (
     <Section
-      id="skills"
+      id="technologies"
       className="py-24 sm:py-32 lg:py-40"
       watermark="Stack"
     >
@@ -2372,11 +2645,11 @@ function Skills() {
         <div className="mb-4 flex items-center gap-3">
           <div className="h-px w-8 bg-accent/50" />
           <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-            Skills
+            Technologies I Work With
           </span>
         </div>
         <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-          <TextScramble text="My toolkit" />
+          <TextScramble text="Tools of the trade" />
         </h2>
       </div>
 
@@ -2390,6 +2663,164 @@ function Skills() {
         <div style={{ direction: "rtl" }}>
           <Marquee items={row2} />
         </div>
+      </div>
+    </Section>
+  );
+}
+
+/* ================================================================
+   CURRENTLY BUILDING
+   ================================================================ */
+
+function CurrentlyBuilding() {
+  const items = [
+    {
+      name: "Constraint-driven architectures",
+      detail: "Systems where the data model enforces business rules\u2014not application code.",
+      status: "active",
+    },
+    {
+      name: "Autonomous workflow engines",
+      detail: "Pipeline-based systems that classify, route, and act on data without manual intervention.",
+      status: "active",
+    },
+    {
+      name: "Market intelligence infrastructure",
+      detail: "LLM-powered signal processing for competitive analysis at scale.",
+      status: "research",
+    },
+    {
+      name: "Generator-based SaaS tooling",
+      detail: "Patterns for scaffolding entire product verticals from structured config.",
+      status: "exploring",
+    },
+  ];
+
+  return (
+    <Section
+      id="building"
+      className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
+    >
+      <div className="mb-4 flex items-center gap-3">
+        <div className="h-px w-8 bg-accent/50" />
+        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+          What I&apos;m Currently Building
+        </span>
+      </div>
+
+      <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+        <TextScramble text="Active workstreams" />
+      </h2>
+
+      <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-zinc-500">
+        Beyond shipping features, these are the engineering challenges I&apos;m
+        actively investing in. Each one compounds into the systems I build next.
+      </p>
+
+      <div className="mt-12 grid gap-4 sm:grid-cols-2">
+        {items.map((item) => (
+          <SpotlightCard key={item.name} className="p-5">
+            <div className="relative z-10">
+              <div className="mb-3 flex items-center gap-2">
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                  item.status === "active"
+                    ? "bg-accent/10 text-accent ring-1 ring-accent/20"
+                    : item.status === "research"
+                    ? "bg-purple-400/10 text-purple-400 ring-1 ring-purple-400/20"
+                    : "bg-sky-400/10 text-sky-400 ring-1 ring-sky-400/20"
+                }`}>
+                  {item.status === "active" && (
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-accent" style={{ animation: "pulse-ring 2s ease-out infinite" }} />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+                    </span>
+                  )}
+                  {item.status}
+                </span>
+              </div>
+              <h3 className="text-[14px] font-semibold text-white">{item.name}</h3>
+              <p className="mt-2 text-[12px] leading-relaxed text-zinc-600">{item.detail}</p>
+            </div>
+          </SpotlightCard>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/* ================================================================
+   LEARNING & GROWTH
+   ================================================================ */
+
+function Learning() {
+  const topics = [
+    {
+      area: "Systems Architecture",
+      detail: "Distributed systems patterns, event sourcing, CQRS. Moving from monolith-first to understanding when to extract services.",
+      icon: (
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+      ),
+    },
+    {
+      area: "Data-Intensive Applications",
+      detail: "Database internals, replication strategies, indexing patterns. Building intuition for when PostgreSQL is and isn\u2019t enough.",
+      icon: (
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" /></svg>
+      ),
+    },
+    {
+      area: "AI-Augmented Engineering",
+      detail: "Not just using LLMs as chat tools. Exploring structured agentic workflows, multi-model routing, and when AI genuinely compounds.",
+      icon: (
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+      ),
+    },
+  ];
+
+  return (
+    <Section
+      id="learning"
+      className="mx-auto max-w-5xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40"
+    >
+      <div className="mb-4 flex items-center gap-3">
+        <div className="h-px w-8 bg-accent/50" />
+        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+          Growth
+        </span>
+      </div>
+
+      <h2 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+        <TextScramble text="What I'm studying" />
+      </h2>
+
+      <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-zinc-500">
+        Engineering depth isn&apos;t built by shipping alone. These are the areas I&apos;m
+        deliberately investing time in to become a stronger systems thinker.
+      </p>
+
+      <div className="mt-12 grid gap-4 sm:grid-cols-3">
+        {topics.map((topic) => (
+          <SpotlightCard key={topic.area} className="p-5">
+            <div className="relative z-10">
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-accent/[0.08] text-accent">
+                {topic.icon}
+              </div>
+              <h3 className="text-[14px] font-semibold text-white">{topic.area}</h3>
+              <p className="mt-2 text-[12px] leading-relaxed text-zinc-600">{topic.detail}</p>
+            </div>
+          </SpotlightCard>
+        ))}
+      </div>
+
+      {/* Technical writing hint */}
+      <div className="mt-10 flex items-center gap-3 rounded-xl border border-white/[0.04] bg-white/[0.015] px-5 py-4">
+        <svg className="h-4 w-4 shrink-0 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
+        <span className="text-[12px] text-zinc-600">
+          Technical writing in progress \u2014{" "}
+          <span className="italic text-zinc-500">&quot;How I designed and shipped a SaaS platform as a solo engineer.&quot;</span>
+        </span>
       </div>
     </Section>
   );
@@ -2516,7 +2947,7 @@ export default function Home() {
       <BeamDivider />
       <About />
       <BeamDivider />
-      <Approach />
+      <Principles />
       <BeamDivider />
       <Experience />
       <BeamDivider />
@@ -2524,7 +2955,13 @@ export default function Home() {
       <BeamDivider />
       <Systems />
       <BeamDivider />
-      <Skills />
+      <ArchitectureDeepDive />
+      <BeamDivider />
+      <CurrentlyBuilding />
+      <BeamDivider />
+      <Technologies />
+      <BeamDivider />
+      <Learning />
       <BeamDivider />
       <Contact />
       <Footer />
