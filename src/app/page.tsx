@@ -1793,8 +1793,7 @@ function Hero() {
           }}
         >
           Designing scalable SaaS platforms, data architectures, and autonomous
-          systems. Turning strategic intent into production-ready software,
-          built to last.
+          systems. Building software that actually works in production.
         </p>
 
         {/* CTA */}
@@ -1909,27 +1908,28 @@ function About() {
 
       <div className="mt-12 max-w-2xl space-y-5 text-[15px] leading-[1.8] text-zinc-400">
         <p>
-          I&apos;m a Full Stack Engineer at{" "}
+          I&apos;m a Full Stack Developer at{" "}
           <span className="font-medium text-white">
             Bright Technology Ventures
           </span>
-          , where I serve as a technical sparring partner for management and
-          commercial teams. I translate business strategy into scalable,
-          production-grade systems across multiple business units.
+          , where I build and maintain digital platforms and internal tools
+          across multiple business units. I work closely with management and
+          commercial teams to figure out what needs to be built and then
+          actually build it.
         </p>
         <p>
-          I specialize in designing software that reduces long-term development
-          friction. Generator-driven architectures, structured data models, and
-          systems that improve through iteration rather than decay.
+          I like keeping things simple. Clean data models, clear code, and
+          systems that are easy to change later. Most of my work revolves
+          around SaaS platforms, data pipelines, and integrating AI where
+          it makes sense.
         </p>
         <p>
-          Before moving into engineering, I spent four years as a{" "}
+          Before getting into development, I worked four years as a{" "}
           <span className="font-medium text-white">
             Communication Specialist
           </span>{" "}
-          at a real estate tech startup, helping scale it from early-stage to
-          scale-up. That background shapes how I build: I don&apos;t just ship
-          features. I build systems that create measurable business value.
+          at a real estate tech startup. That taught me to think about the
+          business side too, not just the code.
         </p>
       </div>
     </Section>
@@ -1941,12 +1941,12 @@ function About() {
    ================================================================ */
 
 const principleItems = [
-  { label: "Simplicity scales", sub: "Minimise moving parts. Every abstraction earns its keep or gets removed." },
-  { label: "Data structures define capability", sub: "Get the schema right and the features follow. Schema-first thinking, always." },
-  { label: "Maintainability beats velocity", sub: "Code that\u2019s easy to change is more valuable than code that shipped fast." },
-  { label: "Automate the marginal cost", sub: "Generator-driven development. If I\u2019m doing it twice, I build a system for it." },
-  { label: "Production constraints from day one", sub: "Auth, rate limiting, error handling, monitoring\u2014shipped from the first commit." },
-  { label: "Software as infrastructure", sub: "Not experiments. Every system is designed to outlast its current requirements." },
+  { label: "Simplicity scales", sub: "Keep it simple. Less moving parts means less stuff that breaks." },
+  { label: "Schema-first thinking", sub: "Get the data model right and everything else follows naturally." },
+  { label: "Easy to change > fast to ship", sub: "Code you can easily modify next month is worth more than code you rushed out today." },
+  { label: "Automate what repeats", sub: "If I'm doing it twice, I build a tool for it." },
+  { label: "Production-ready from day one", sub: "Auth, rate limiting, error handling, monitoring. All there from the first commit." },
+  { label: "Build it to last", sub: "Not throwaway experiments. Systems that still work when requirements change." },
 ];
 
 function Principles() {
@@ -1967,8 +1967,8 @@ function Principles() {
       </h2>
 
       <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-zinc-500">
-        These aren&apos;t buzzwords. They&apos;re the decision filters I use on every technical
-        choice, from database schema design to deployment strategy.
+        Not buzzwords. Just the things I actually think about when making
+        technical decisions.
       </p>
 
       <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -2000,7 +2000,7 @@ const jobs = [
     role: "Full Stack Web Developer",
     company: "Bright Technology Ventures",
     current: true,
-    text: "Technical sparring partner for management and commercial teams. Designing, building, and maintaining digital platforms and internal intelligence systems across multiple business units.",
+    text: "Building and maintaining web platforms and internal tools for multiple business units. I work directly with management and commercial teams to decide what to build and how.",
     tags: [
       "Multi-tenant SaaS",
       "Data Modeling",
@@ -2014,7 +2014,7 @@ const jobs = [
     role: "Technical Marketer",
     company: "Bright Technology Ventures",
     current: false,
-    text: "Bridged commercial growth and technical execution. Website performance, data quality, GTM, and HubSpot routing across business units.",
+    text: "Worked on the intersection of marketing and tech. Website performance, tracking, data quality, GTM setup, and HubSpot configuration across business units.",
     tags: ["GTM", "HubSpot", "Performance", "Commercial Growth"],
   },
   {
@@ -2022,23 +2022,23 @@ const jobs = [
     role: "Communication Specialist",
     company: "Kode Vastgoed",
     current: false,
-    text: "Helped scale the company from startup to scale-up. Led content strategy, stakeholder communication, and multi-channel growth initiatives.",
+    text: "Joined when it was still small and helped grow it into a proper company. Did content, stakeholder communication, and marketing across multiple channels.",
     tags: ["Content Strategy", "Stakeholders", "Startup Scaling"],
   },
   {
     period: "2020 \u2013 2021",
-    role: "Intern \u2013 Entrepreneurial Exploration",
+    role: "Intern",
     company: "Bluehub / Inventurinq (Venture Capital)",
     current: false,
-    text: "Explored new venture opportunities within a VC environment. Researched market positioning, validated business models, and contributed to early-stage investment analysis across multiple portfolio companies.",
+    text: "Helped explore new business opportunities within a VC firm. Did market research, tested business ideas, and helped with investment analysis for portfolio companies.",
     tags: ["Venture Capital", "Business Modeling", "Market Research", "Startups"],
   },
   {
     period: "2019 \u2013 2020",
-    role: "Intern \u2013 Supply Chain Strategy",
+    role: "Intern",
     company: "e-Fulfilment Hub",
     current: false,
-    text: "Mapped stakeholder positioning within the supply chain and developed strategic recommendations. Gained hands-on experience in logistics operations and stakeholder management at an SME level.",
+    text: "Researched supply chain positioning and wrote strategic recommendations. Got hands-on experience with logistics and how things actually move.",
     tags: ["Supply Chain", "Stakeholder Strategy", "Logistics", "SME"],
   },
 ];
@@ -2130,7 +2130,7 @@ const projects = [
   {
     title: "Beyond Bricks",
     sub: "Service Cost Management SaaS Platform",
-    text: "Sole engineer. Designed and shipped a production SaaS platform for Dutch property managers to digitally generate, deliver, and collect service charge settlements. Full ownership: architecture, backend, frontend, security, payments, deployment.",
+    text: "Built this from scratch as the sole developer. It's a SaaS platform for Dutch property managers to create, send, and collect service charge settlements online. I did everything: architecture, backend, frontend, auth, payments, deployment.",
     stats: [
       { value: 52, label: "API Routes" },
       { value: 24, label: "DB Models" },
@@ -2145,10 +2145,10 @@ const projects = [
       "Multi-tenant data isolation at query level",
     ],
     challenges: [
-      "Designed a multi-tenant data model where all queries enforce user-scoped access\u2014no data leaks between accounts",
-      "Built an idempotent Mollie webhook handler with HMAC signature verification to prevent replay attacks",
-      "Implemented tiered rate limiting (5/15min login, 100/min API) without external infra using in-memory token buckets",
-      "Created a generator-based PDF settlement system that handles variable cost categories and distribution methods",
+      "Built multi-tenant data isolation so users can never see each other's data",
+      "Set up Mollie payment webhooks with HMAC verification to prevent tampering",
+      "Added rate limiting per route (5/15min for login, 100/min for APIs) without any external services",
+      "Created a PDF generator that handles different cost categories and splits them correctly per tenant",
     ],
     impact: [
       "Eliminated manual Excel-based settlement process for property managers",
@@ -2177,7 +2177,7 @@ const projects = [
   {
     title: "Sentinel",
     sub: "Autonomous Market Intelligence System (R&D)",
-    text: "Designing a research-driven platform for automated competitive and market analysis. Ingests signals from public sources, classifies strategic movement, and surfaces actionable intelligence for internal decision-makers.",
+    text: "Building a system that automatically monitors competitors and market changes. It pulls data from public sources, uses LLMs to figure out what's actually important, and gives our team a clear picture of what's happening.",
     stats: [
       { value: 4, label: "Pipelines" },
       { value: 3, label: "LLM Models" },
@@ -2190,14 +2190,14 @@ const projects = [
       "Serverless task orchestration on event triggers",
     ],
     challenges: [
-      "Designing a classification layer that distinguishes noise from strategic signal across unstructured sources",
-      "Managing LLM cost vs. accuracy trade-offs with a tiered model routing strategy",
-      "Building fault-tolerant pipelines that retry gracefully without duplicate processing",
+      "Figuring out how to separate noise from actually useful signals in messy, unstructured data",
+      "Balancing LLM costs with accuracy by routing different tasks to different models",
+      "Making pipelines that handle failures gracefully without processing things twice",
     ],
     impact: [
-      "Replaces hours of manual competitive research per week",
-      "Structured intelligence output usable by non-technical stakeholders",
-      "Modular pipeline design allows adding new signal sources without rewriting core logic",
+      "Saves hours of manual competitor research every week",
+      "Gives non-technical team members clear, actionable insights",
+      "Easy to add new data sources without rewriting the core system",
     ],
     links: {
       note: "Internal R&D \u2013 architecture overview available on request",
@@ -2708,23 +2708,23 @@ function Technologies() {
 function CurrentlyBuilding() {
   const items = [
     {
-      name: "Constraint-driven architectures",
-      detail: "Systems where the data model enforces business rules\u2014not application code.",
+      name: "Data model-driven architecture",
+      detail: "Letting the database schema enforce the rules instead of writing a bunch of if-statements.",
       status: "active",
     },
     {
-      name: "Autonomous workflow engines",
-      detail: "Pipeline-based systems that classify, route, and act on data without manual intervention.",
+      name: "Automated workflows",
+      detail: "Systems that process, sort, and act on data without someone having to click buttons.",
       status: "active",
     },
     {
-      name: "Market intelligence infrastructure",
-      detail: "LLM-powered signal processing for competitive analysis at scale.",
+      name: "Market intelligence tooling",
+      detail: "Using LLMs to process competitive data and surface what actually matters.",
       status: "research",
     },
     {
-      name: "Generator-based SaaS tooling",
-      detail: "Patterns for scaffolding entire product verticals from structured config.",
+      name: "Reusable SaaS patterns",
+      detail: "Standardizing the parts that are the same across every SaaS product I build.",
       status: "exploring",
     },
   ];
@@ -2746,8 +2746,8 @@ function CurrentlyBuilding() {
       </h2>
 
       <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-zinc-500">
-        Beyond shipping features, these are the engineering challenges I&apos;m
-        actively investing in. Each one compounds into the systems I build next.
+        Things I&apos;m working on besides client projects. Stuff that makes
+        the next thing I build better.
       </p>
 
       <div className="mt-12 grid gap-4 sm:grid-cols-2">
@@ -2789,21 +2789,21 @@ function Learning() {
   const topics = [
     {
       area: "Systems Architecture",
-      detail: "Distributed systems patterns, event sourcing, CQRS. Moving from monolith-first to understanding when to extract services.",
+      detail: "Distributed systems, event sourcing, CQRS. Learning when it makes sense to split things up vs. keeping it simple.",
       icon: (
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
       ),
     },
     {
       area: "Data-Intensive Applications",
-      detail: "Database internals, replication strategies, indexing patterns. Building intuition for when PostgreSQL is and isn\u2019t enough.",
+      detail: "How databases actually work under the hood. Replication, indexing, and knowing when Postgres isn't enough.",
       icon: (
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" /></svg>
       ),
     },
     {
       area: "AI-Augmented Engineering",
-      detail: "Not just using LLMs as chat tools. Exploring structured agentic workflows, multi-model routing, and when AI genuinely compounds.",
+      detail: "Going beyond ChatGPT. Working with structured agent workflows, multi-model setups, and figuring out where AI actually helps.",
       icon: (
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
       ),
@@ -2827,8 +2827,8 @@ function Learning() {
       </h2>
 
       <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-zinc-500">
-        Engineering depth isn&apos;t built by shipping alone. These are the areas I&apos;m
-        deliberately investing time in to become a stronger systems thinker.
+        You don&apos;t get better by just building. These are the things I&apos;m
+        actively studying to level up.
       </p>
 
       <div className="mt-12 grid gap-4 sm:grid-cols-3">
@@ -2851,8 +2851,8 @@ function Learning() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
         </svg>
         <span className="text-[12px] text-zinc-600">
-          Technical writing in progress \u2014{" "}
-          <span className="italic text-zinc-500">&quot;How I designed and shipped a SaaS platform as a solo engineer.&quot;</span>
+          Writing something about how I built a SaaS platform solo.{" "}
+          <span className="italic text-zinc-500">Coming soon.</span>
         </span>
       </div>
     </Section>
@@ -2878,14 +2878,14 @@ function BlogPreview() {
           Coming Soon
         </h2>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-zinc-500">
-          I&apos;m working on technical articles about system design, SaaS architecture,
-          and lessons from building production software as a solo engineer.
+          Working on some articles about building software, SaaS architecture,
+          and things I learned along the way.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {[
-            { title: "Shipping a SaaS Solo", desc: "Architecture decisions, trade-offs, and what I'd do differently." },
-            { title: "Data Pipelines at Scale", desc: "How I built ETL flows that handle millions of records daily." },
-            { title: "AI in Production", desc: "Practical patterns for integrating LLMs into real products." },
+            { title: "Shipping a SaaS Solo", desc: "What I built, the decisions I made, and what I'd do differently." },
+            { title: "Data Pipelines at Scale", desc: "How I set up ETL flows that process millions of records." },
+            { title: "AI in Production", desc: "Where LLMs actually help and where they don't." },
           ].map((post) => (
             <div
               key={post.title}
@@ -2935,7 +2935,7 @@ function Contact() {
         </h2>
 
         <p className="mx-auto mt-6 max-w-md text-base leading-relaxed text-zinc-500 sm:text-lg">
-          Whether you want to collaborate on ambitious projects or just talk shop about architecture and systems.
+          Want to work together or just have a chat about tech? Reach out.
         </p>
 
         {/* Big CTA button */}
