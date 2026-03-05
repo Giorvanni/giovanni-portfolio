@@ -1160,7 +1160,7 @@ function SideNav({ active }: { active: string }) {
   ];
 
   return (
-    <nav className="side-nav hidden lg:flex" aria-label="Section navigation">
+    <nav className="side-nav hidden md:flex" aria-label="Section navigation">
       {items.map((item) => (
         <a
           key={item.id}

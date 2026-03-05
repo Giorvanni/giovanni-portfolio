@@ -515,7 +515,7 @@ body {
   right: 24px;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 100;
+  z-index: 9000;
   display: flex;
   flex-direction: column;
   gap: 12px;
