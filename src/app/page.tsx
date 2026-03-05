@@ -298,9 +298,9 @@ function ParticleField() {
     let id = 0;
     const mouse = { x: -9999, y: -9999 };
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const N = 60;
-    const CONN = 130;
-    const MR = 180;
+    const N = 40;
+    const CONN = 120;
+    const MR = 160;
 
     type P = { x: number; y: number; vx: number; vy: number; r: number };
     const pts: P[] = [];
@@ -367,7 +367,7 @@ function ParticleField() {
         if (p.y > h) p.y = 0;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(110,231,183,0.25)";
+        ctx.fillStyle = "rgba(110,231,183,0.15)";
         ctx.fill();
       }
 
@@ -380,7 +380,7 @@ function ParticleField() {
             ctx.beginPath();
             ctx.moveTo(pts[i].x, pts[i].y);
             ctx.lineTo(pts[j].x, pts[j].y);
-            ctx.strokeStyle = `rgba(110,231,183,${(1 - d / CONN) * 0.12})`;
+            ctx.strokeStyle = `rgba(110,231,183,${(1 - d / CONN) * 0.08})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -395,7 +395,7 @@ function ParticleField() {
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = `rgba(110,231,183,${(1 - d / MR) * 0.25})`;
+          ctx.strokeStyle = `rgba(110,231,183,${(1 - d / MR) * 0.15})`;
           ctx.lineWidth = 0.5;
           ctx.stroke();
         }
@@ -1225,17 +1225,6 @@ function Section({
       ref={ref}
       className={`reveal-ready ${visible ? "reveal-visible" : ""} relative overflow-hidden ${className}`}
     >
-      {watermark && (
-        <span
-          className="section-watermark"
-          style={{
-            opacity: visible ? 1 : 0,
-            transition: "opacity 1.5s ease 0.3s",
-          }}
-        >
-          {watermark}
-        </span>
-      )}
       {children}
     </section>
   );
@@ -1736,12 +1725,6 @@ function Hero() {
       {/* Interactive particle constellation */}
       <ParticleField />
 
-      {/* Floating tech icons */}
-      <FloatingIcons />
-
-      {/* 3D orbit rings */}
-      <OrbitRings />
-
       {/* Content */}
       <div className="relative z-10 mx-auto w-full max-w-3xl text-center">
         {/* Status badge */}
@@ -1762,15 +1745,13 @@ function Hero() {
           </span>
         </div>
 
-        {/* Name with split letter animation */}
-        <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-black leading-[0.95] tracking-tighter text-white" style={{ perspective: "600px" }}>
-          <GlitchText>
-            <SplitText text="Giovanni" loaded={loaded} baseDelay={0.3} />
-          </GlitchText>
+        {/* Name */}
+        <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-black leading-[0.95] tracking-tighter text-white">
+          <SplitText text="Giovanni" loaded={loaded} baseDelay={0.3} />
           <br />
-          <GlitchText className="shimmer-text">
+          <span className="shimmer-text">
             <SplitText text="Bagmeijer" loaded={loaded} baseDelay={0.6} />
-          </GlitchText>
+          </span>
         </h1>
 
         {/* Role */}
@@ -1837,33 +1818,6 @@ function Hero() {
             Download CV
           </a>
         </div>
-      </div>
-
-      {/* Floating code window — desktop only */}
-      <div
-        className="absolute bottom-20 right-8 z-[5] hidden xl:block 2xl:right-[calc(50vw-560px)]"
-        style={{ perspective: "800px" }}
-      >
-        <div
-          style={{
-            transform: "rotateY(-8deg) rotateX(4deg)",
-            opacity: 0,
-            animation: "fade-up 0.8s 1.9s forwards",
-          }}
-        >
-          <CodeWindow />
-        </div>
-      </div>
-
-      {/* Status widget — desktop only */}
-      <div
-        className="absolute bottom-24 left-8 z-10 hidden lg:block xl:left-[calc(50vw-520px)]"
-        style={{
-          opacity: 0,
-          animation: "fade-up 0.8s 2.2s forwards",
-        }}
-      >
-        <StatusWidget />
       </div>
 
       {/* Scroll hint */}
@@ -3065,7 +3019,6 @@ export default function Home() {
       <Nav active={active} />
       <SideNav active={active} />
       <Hero />
-      <TerminalStrip />
       <MetricsBanner />
       <About />
       <Principles />
