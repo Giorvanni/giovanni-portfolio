@@ -214,6 +214,7 @@ function useCustomCursor() {
       dot.style.top = `${my}px`;
       dot.style.opacity = "1";
       ring.style.opacity = "1";
+      if (idle) { idle = false; raf = requestAnimationFrame(tick); }
     };
 
     const leave = () => {
@@ -230,10 +231,17 @@ function useCustomCursor() {
       ring.classList.toggle("hover", h);
     };
 
+    let idle = false;
     const tick = () => {
       if (!document.hidden) {
-        rx += (mx - rx) * 0.12;
-        ry += (my - ry) * 0.12;
+        const dx = mx - rx;
+        const dy = my - ry;
+        if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
+          idle = true;
+          return; // stop loop when cursor idle
+        }
+        rx += dx * 0.12;
+        ry += dy * 0.12;
         ring.style.left = `${rx}px`;
         ring.style.top = `${ry}px`;
       }
@@ -341,9 +349,15 @@ function ParticleField() {
     c.addEventListener("mouseleave", onLeave);
     window.addEventListener("resize", resize);
 
-    const draw = () => {
+    let lastPFrame = 0;
+    const P_FRAME_MS = 1000 / 30; // cap at 30fps
+
+    const draw = (now?: number) => {
       id = requestAnimationFrame(draw);
       if (document.hidden) return;
+      if (now && now - lastPFrame < P_FRAME_MS) return;
+      if (now) lastPFrame = now;
+
       const w = W();
       const h = H();
       ctx.clearRect(0, 0, w, h);
@@ -813,9 +827,15 @@ function Aurora() {
     };
     resize();
 
-    const draw = () => {
+    let lastFrame = 0;
+    const FRAME_MS = 1000 / 30; // cap at 30fps
+
+    const draw = (now: number) => {
       id = requestAnimationFrame(draw);
       if (document.hidden) return;
+      if (now - lastFrame < FRAME_MS) return;
+      lastFrame = now;
+
       const w = c.width;
       const h = c.height;
       ctx.clearRect(0, 0, w, h);
@@ -833,7 +853,7 @@ function Aurora() {
         const baseY = h * band.yOff;
         ctx.moveTo(0, h);
 
-        for (let x = 0; x <= w; x += 3) {
+        for (let x = 0; x <= w; x += 6) {
           const wave1 = Math.sin(x * band.freq + t * band.speed) * band.amp;
           const wave2 = Math.sin(x * band.freq * 2.3 + t * band.speed * 0.7) * band.amp * 0.4;
           const wave3 = Math.cos(x * band.freq * 0.5 + t * band.speed * 1.2) * band.amp * 0.3;

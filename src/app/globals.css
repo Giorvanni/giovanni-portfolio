@@ -24,10 +24,6 @@
   from { transform: scaleY(0); }
   to   { transform: scaleY(1); }
 }
-@keyframes marquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
 @keyframes border-spin {
   0%   { --border-angle: 0deg; }
   100% { --border-angle: 360deg; }
@@ -180,16 +176,6 @@ body {
   opacity: 0;
 }
 
-/* === Marquee === */
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee 30s linear infinite;
-}
-.marquee-track:hover {
-  animation-play-state: paused;
-}
-
 /* === Nav link active state === */
 .nav-link-active {
   color: #fff !important;
@@ -209,7 +195,6 @@ body {
   z-index: 9999;
   transform-origin: left;
   transform: scaleX(0);
-  will-change: transform;
 }
 
 @keyframes gradient-x {
@@ -230,23 +215,6 @@ body {
   margin-left: 2px;
   animation: blink-caret 0.8s step-end infinite;
   vertical-align: text-bottom;
-}
-
-/* === Section watermark === */
-.section-watermark {
-  position: absolute;
-  top: -0.1em;
-  right: -5%;
-  font-size: clamp(5rem, 14vw, 12rem);
-  font-weight: 900;
-  text-transform: uppercase;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(255,255,255,0.015);
-  line-height: 1;
-  pointer-events: none;
-  user-select: none;
-  z-index: 0;
-  white-space: nowrap;
 }
 
 /* === Animated gradient outline button === */
@@ -373,106 +341,6 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* === Code window === */
-.code-window {
-  background: rgba(17, 17, 17, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow:
-    0 40px 80px -20px rgba(0,0,0,0.5),
-    0 0 0 1px rgba(255,255,255,0.03) inset;
-}
-.code-window-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  background: rgba(255,255,255,0.02);
-}
-.code-window-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-/* === Orbit rings === */
-@keyframes orbit {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-@keyframes orbit-reverse {
-  from { transform: rotate(360deg); }
-  to   { transform: rotate(0deg); }
-}
-.orbit-system {
-  transform-style: preserve-3d;
-  transform: rotateX(75deg) rotateZ(-15deg);
-}
-.orbit-ring {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  border-radius: 50%;
-  border-style: solid;
-}
-.orbit-dot {
-  position: absolute;
-  border-radius: 50%;
-  top: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-/* === Terminal strip === */
-.terminal-strip {
-  overflow: hidden;
-  border-top: 1px solid rgba(255,255,255,0.03);
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-  background: rgba(255,255,255,0.01);
-  padding: 10px 0;
-}
-
-/* === Glitch effect === */
-@keyframes glitch-1 {
-  0%, 100% { clip-path: inset(40% 0 61% 0); transform: translate(-2px, 2px); }
-  20% { clip-path: inset(92% 0 1% 0); transform: translate(1px, -1px); }
-  40% { clip-path: inset(43% 0 1% 0); transform: translate(-1px, 3px); }
-  60% { clip-path: inset(25% 0 58% 0); transform: translate(3px, 1px); }
-  80% { clip-path: inset(54% 0 7% 0); transform: translate(-3px, -2px); }
-}
-@keyframes glitch-2 {
-  0%, 100% { clip-path: inset(65% 0 8% 0); transform: translate(3px, -1px); }
-  20% { clip-path: inset(17% 0 76% 0); transform: translate(-2px, 2px); }
-  40% { clip-path: inset(81% 0 2% 0); transform: translate(2px, -3px); }
-  60% { clip-path: inset(6% 0 84% 0); transform: translate(-3px, 1px); }
-  80% { clip-path: inset(39% 0 45% 0); transform: translate(1px, 2px); }
-}
-.glitch-wrapper {
-  position: relative;
-  display: inline-block;
-}
-.glitch-wrapper:hover .glitch-layer {
-  opacity: 1;
-}
-.glitch-layer {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-.glitch-layer:nth-child(1) {
-  color: #0ff;
-  animation: glitch-1 0.3s infinite linear alternate-reverse;
-}
-.glitch-layer:nth-child(2) {
-  color: #f0f;
-  animation: glitch-2 0.3s infinite linear alternate-reverse;
-}
-
 /* === Horizontal scroll projects === */
 .horizontal-scroll-section {
   position: relative;
@@ -570,22 +438,6 @@ body {
   border-color: #6ee7b7;
   box-shadow: 0 0 12px 3px rgba(110, 231, 183, 0.35);
   transform: scale(1.3);
-}
-
-/* === Floating tech icons === */
-@keyframes float-icon {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  33%      { transform: translateY(-12px) rotate(3deg); }
-  66%      { transform: translateY(6px) rotate(-2deg); }
-}
-.floating-icon {
-  position: absolute;
-  pointer-events: none;
-  font-size: 24px;
-  opacity: 0.12;
-  animation: float-icon 6s ease-in-out infinite;
-  filter: blur(0.5px);
-  z-index: 0;
 }
 
 /* === Dot grid canvas === */
