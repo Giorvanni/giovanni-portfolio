@@ -1160,7 +1160,7 @@ function SideNav({ active }: { active: string }) {
   ];
 
   return (
-    <nav className="side-nav hidden md:flex" aria-label="Section navigation">
+    <nav className="side-nav" aria-label="Section navigation">
       {items.map((item) => (
         <a
           key={item.id}
@@ -1168,7 +1168,9 @@ function SideNav({ active }: { active: string }) {
           data-label={item.label}
           className={`side-dot ${active === item.id ? "active" : ""}`}
           aria-label={item.label}
-        />
+        >
+          <span className="side-dot-inner" />
+        </a>
       ))}
     </nav>
   );
