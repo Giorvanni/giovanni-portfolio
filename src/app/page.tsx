@@ -1839,7 +1839,7 @@ function Hero() {
 
       {/* Floating code window — desktop only */}
       <div
-        className="absolute bottom-20 right-8 z-10 hidden lg:block xl:right-[calc(50vw-520px)]"
+        className="absolute bottom-20 right-8 z-[5] hidden xl:block 2xl:right-[calc(50vw-560px)]"
         style={{ perspective: "800px" }}
       >
         <div
