@@ -521,7 +521,7 @@ function CodeWindow() {
           <span className="text-zinc-400">role</span>
           <span className="text-zinc-600">:</span>{" "}
           <span className="text-green-300">
-            &quot;Full Stack Engineer&quot;
+            &quot;AI Automation Engineer&quot;
           </span>
           <span className="text-zinc-600">,</span>
         </>
@@ -1783,7 +1783,7 @@ function Hero() {
             transition: "opacity 0.6s 0.4s, transform 0.6s 0.4s",
           }}
         >
-          <Typewriter text="Systems-Oriented Full Stack Engineer" startDelay={1.6} />
+          <Typewriter text="AI Automation Engineer" startDelay={1.6} />
         </p>
 
         {/* Description */}
@@ -1795,8 +1795,8 @@ function Hero() {
             transition: "opacity 0.6s 0.5s, transform 0.6s 0.5s",
           }}
         >
-          Designing scalable SaaS platforms, data architectures, and autonomous
-          systems. Building software that actually works in production.
+          Designing AI-driven automation systems, scalable SaaS platforms,
+          and intelligent tools. Building software that actually works in production.
         </p>
 
         {/* CTA */}
@@ -1884,23 +1884,27 @@ function About() {
 
       <div className="mt-12 max-w-2xl space-y-5 text-[15px] leading-[1.8] text-zinc-400">
         <p>
-          I&apos;m a Full Stack Developer at{" "}
+          I&apos;m an AI Automation Engineer at{" "}
           <span className="font-medium text-white">
             Bright Technology Ventures
           </span>
-          , where I build and maintain digital platforms and internal tools
-          across multiple business units. I work closely with management and
-          commercial teams to figure out what needs to be built and then
-          actually build it.
+          , where I design and build AI-driven automation systems across
+          multiple business units. I combine full stack development with AI
+          and workflow automation to streamline operations and create
+          intelligent tools.
         </p>
         <p>
           I like keeping things simple. Clean data models, clear code, and
           systems that are easy to change later. Most of my work revolves
-          around SaaS platforms, data pipelines, and integrating AI where
-          it makes sense.
+          around AI automation, SaaS platforms, data pipelines, and building
+          smart tools that save people time.
         </p>
         <p>
-          Before getting into development, I worked four years as a{" "}
+          Before this role, I built web platforms as a{" "}
+          <span className="font-medium text-white">
+            Full Stack Developer
+          </span>{" "}
+          at the same company. And before getting into tech, I worked four years as a{" "}
           <span className="font-medium text-white">
             Communication Specialist
           </span>{" "}
@@ -1972,11 +1976,25 @@ function Principles() {
 
 const jobs = [
   {
-    period: "Jun 2024 \u2013 Present",
-    role: "Full Stack Web Developer",
+    period: "Mar 2025 \u2013 Present",
+    role: "AI Automation Engineer",
     company: "Bright Technology Ventures",
     current: true,
-    text: "Building and maintaining web platforms and internal tools for multiple business units. I work directly with management and commercial teams to decide what to build and how.",
+    text: "Designing and building AI-driven automation systems across multiple business units. Combining full stack development with AI and workflow automation to streamline operations and create intelligent tools.",
+    tags: [
+      "AI/LLM Integration",
+      "Workflow Automation",
+      "Full Stack",
+      "Data Pipelines",
+      "Process Optimization",
+    ],
+  },
+  {
+    period: "Jun 2024 \u2013 Feb 2025",
+    role: "Full Stack Web Developer",
+    company: "Bright Technology Ventures",
+    current: false,
+    text: "Built and maintained web platforms and internal tools for multiple business units. Worked directly with management and commercial teams to decide what to build and how.",
     tags: [
       "Multi-tenant SaaS",
       "Data Modeling",

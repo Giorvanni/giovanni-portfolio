@@ -15,31 +15,32 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Giovanni Bagmeijer | Full Stack Developer",
+  title: "Giovanni Bagmeijer | AI Automation Engineer",
   description:
-    "Full Stack Web Developer specializing in React, Next.js, data architecture, and AI integration. Building scalable digital platforms and intelligence systems.",
+    "AI Automation Engineer specializing in AI-driven systems, React, Next.js, and workflow automation. Building intelligent tools and scalable platforms.",
   keywords: [
-    "Full Stack Developer",
+    "AI Automation Engineer",
+    "AI",
     "React",
     "Next.js",
     "TypeScript",
-    "Web Developer",
+    "Full Stack Developer",
     "Giovanni Bagmeijer",
   ],
   metadataBase: new URL("https://giovanni-portfolio-eta.vercel.app"),
   openGraph: {
-    title: "Giovanni Bagmeijer | Full Stack Developer",
+    title: "Giovanni Bagmeijer | AI Automation Engineer",
     description:
-      "Full Stack Web Developer specializing in React, Next.js, data architecture, and AI integration.",
+      "AI Automation Engineer specializing in AI-driven systems, React, Next.js, and workflow automation.",
     type: "website",
     url: "https://giovanni-portfolio-eta.vercel.app",
     siteName: "Giovanni Bagmeijer",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Giovanni Bagmeijer | Full Stack Developer",
+    title: "Giovanni Bagmeijer | AI Automation Engineer",
     description:
-      "Full Stack Web Developer specializing in React, Next.js, data architecture, and AI integration.",
+      "AI Automation Engineer specializing in AI-driven systems, React, Next.js, and workflow automation.",
   },
   alternates: {
     canonical: "https://giovanni-portfolio-eta.vercel.app",
@@ -61,7 +62,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Person",
               name: "Giovanni Bagmeijer",
-              jobTitle: "Full Stack Developer",
+              jobTitle: "AI Automation Engineer",
               url: "https://giovanni-portfolio-eta.vercel.app",
               email: "g.bagmeijer@gmail.com",
               telephone: "+31645073445",
