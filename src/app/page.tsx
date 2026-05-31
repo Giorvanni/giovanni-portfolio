@@ -1888,8 +1888,9 @@ function About() {
           <span className="font-medium text-white">
             Bright Technology Ventures
           </span>
-          , where I design and build AI-driven automation systems across
-          multiple business units. I combine full stack development with AI
+          , where I design and build AI-driven automation systems across its
+          operating companies &mdash; Connected Load Carrier, Dutch IoT
+          Solutions, and sister businesses. I combine full stack development with AI
           and workflow automation to streamline operations and create
           intelligent tools.
         </p>
@@ -1904,7 +1905,7 @@ function About() {
           <span className="font-medium text-white">
             Full Stack Developer
           </span>{" "}
-          at the same company. And before getting into tech, I worked four years as a{" "}
+          at the same company. And before getting into tech, I worked three years as a{" "}
           <span className="font-medium text-white">
             Communication Specialist
           </span>{" "}
@@ -1976,7 +1977,7 @@ function Principles() {
 
 const jobs = [
   {
-    period: "Mar 2025 \u2013 Present",
+    period: "Mar 2026 \u2013 Present",
     role: "AI Automation Engineer",
     company: "Bright Technology Ventures",
     current: true,
@@ -1990,7 +1991,7 @@ const jobs = [
     ],
   },
   {
-    period: "Jun 2024 \u2013 Feb 2025",
+    period: "Jun 2024 \u2013 Mar 2026",
     role: "Full Stack Web Developer",
     company: "Bright Technology Ventures",
     current: false,
@@ -2012,7 +2013,7 @@ const jobs = [
     tags: ["GTM", "HubSpot", "Performance", "Commercial Growth"],
   },
   {
-    period: "2019 \u2013 2023",
+    period: "2021 \u2013 2023",
     role: "Communication Specialist",
     company: "Kode Vastgoed",
     current: false,
